@@ -9,6 +9,7 @@
   <style>
     body {
       --background-default: #0c1234;
+      overflow: auto !important;
     }
   </style>
 </head>

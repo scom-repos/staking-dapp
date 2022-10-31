@@ -53,18 +53,18 @@ Styles.cssRule('.manage-stake', {
             },
             'i-vstack': {
               alignItems: 'flex-start',
-              marginBottom: '2rem',
+              marginBottom: '1rem',
             },
           },
         },
         '.description': {
           background: 'linear-gradient(255deg,#f15e61,#b52082)',
-          padding: '0.75rem 1rem',
+          padding: '0.25rem 1rem',
           marginBottom: '1rem',
           $nest: {
             'i-label': {
               display: 'block',
-              padding: '0.5rem 0',
+              padding: '0.25rem 0',
             }
           }
         },
@@ -142,6 +142,7 @@ Styles.cssRule('.manage-stake', {
           background: '#192046',
           width: 480,
           maxWidth: '100%',
+          maxHeight: 405,
           borderRadius: '1rem',
           padding: '1.5rem 1rem',
           color: '#fff'

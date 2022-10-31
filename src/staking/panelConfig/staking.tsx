@@ -4,6 +4,7 @@ import { EventId, isAddressValid, isValidNumber, ITokenObject, limitInputNumber 
 import { getChainId, getDefaultChainId, getTokenMapData, LockTokenType, LockTokenTypeList, Reward, RewardNeeded, Staking } from '@staking/store';
 import { TokenSelection } from '../../token-selection';
 import { RewardConfig } from './reward';
+import { isMultiple } from '../../config';
 
 declare global {
 	namespace JSX {
@@ -354,6 +355,11 @@ export class StakingConfig extends Module {
 		this.btnAdd.enabled = true;
 	}
 
+	private onAddRewardByClick = () => {
+		if (!isMultiple) return;
+		this.onAddReward();
+	}
+
 	private emitInput = () => {
 		application.EventBus.dispatch(EventId.EmitInput);
 	}
@@ -503,9 +509,9 @@ export class StakingConfig extends Module {
 						</i-hstack>
 						<i-panel id="typeSelection" class="network-selection w-input" />
 					</i-hstack>
-					<i-hstack gap={10} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
+					<i-hstack gap={10} visible={isMultiple} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
 						<i-hstack id="listRewardButton" verticalAlignment="center" />
-						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Reward" onClick={() => this.onAddReward()} />
+						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Reward" onClick={() => this.onAddRewardByClick()} />
 					</i-hstack>
 					<i-panel width="100%" height={2} margin={{ bottom: 10 }} background={{ color: '#6573c3' }} />
 					<i-panel id="pnlInfoElm" />

@@ -4,7 +4,7 @@ import { DefaultDateTimeFormat, EventId, isAddressValid } from '@staking/global'
 import { getChainId, getDefaultChainId, getTokenBalance, getTokenMap, Networks, Staking, StakingCampaign } from '@staking/store';
 import moment from 'moment';
 import { StakingConfig } from './staking';
-import { isThemeApplied } from '../../config';
+import { isMultiple, isThemeApplied } from '../../config';
 
 declare global {
 	namespace JSX {
@@ -343,6 +343,11 @@ export class CampaignConfig extends Module {
 		this.btnAdd.enabled = true;
 	}
 
+	private onAddStakingByClick = () => {
+		if (!isMultiple) return;
+		this.onAddStaking();
+	}
+
 	private emitInput = () => {
 		application.EventBus.dispatch(EventId.EmitInput);
 	}
@@ -576,9 +581,9 @@ export class CampaignConfig extends Module {
 							<i-input id="inputStakingBtn" placeholder="linear-gradient(90deg, #AC1D78 0%, #E04862 100%)" class="input-text w-input" onChanged={this.onInputText} />
 						</i-hstack>
 					</i-vstack>
-					<i-hstack gap={10} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
+					<i-hstack gap={10} visible={isMultiple} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
 						<i-hstack id="listStakingButton" verticalAlignment="center" />
-						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Staking" onClick={() => this.onAddStaking()} />
+						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Staking" onClick={() => this.onAddStakingByClick()} />
 					</i-hstack>
 					<i-panel width="100%" height={2} margin={{ bottom: 10 }} background={{ color: '#6573C3' }} />
 					<i-panel id="pnlInfoElm" />

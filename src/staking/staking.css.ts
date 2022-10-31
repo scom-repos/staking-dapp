@@ -150,6 +150,7 @@ Styles.cssRule('.staking-component', {
     '.staking-layout': {
       width: '100%',
       marginInline: 'auto',
+      overflow: 'hidden',
     },
     'i-link': {
       display: 'flex',
@@ -160,12 +161,18 @@ Styles.cssRule('.staking-component', {
         },
       },
     },
+    '.opacity-50': {
+      opacity: 0.5
+    },
+    '.cursor-default': {
+      cursor: 'default',
+    },
     '.wrapper': {
+      width: '100%',
+      height: '100%',
+      maxWidth: 720,
+      maxHeight: 405,
       $nest: {
-        'i-label:not(.duration) > *': {
-          fontSize: '0.875rem',
-          color: '#FFFFFF'
-        },
         '.sticker': {
           position: 'absolute',
           top: '-8px',
@@ -310,15 +317,18 @@ Styles.cssRule('.staking-component', {
           display: 'flex',
           $nest: {
             '.timer-value': {
-              padding: '0.5rem',
-              borderRadius: '0.5rem',
-              fontWeight: 'bold',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: 4,
+              paddingInline: 4,
+              minWidth: 20,
+              height: 20,
+              fontSize: 14,
             },
             '.timer-unit': {
-              marginInline: '0.25rem',
               display: 'flex',
               alignItems: 'center',
-              fontWeight: 'bold',
             },
           },
         },
@@ -353,8 +363,7 @@ Styles.cssRule('.staking-component', {
           width: '100%',
         },
         '.column-custom': {
-          width: '25%',
-          padding: '0',
+          padding: 20,
           height: '100%'
         },
         '.img-custom': {
@@ -380,13 +389,15 @@ Styles.cssRule('.staking-component', {
           },
         },
         '.btn-stake': {
-          width: '100%',
+          width: 320,
+          maxWidth: '100%',
           padding: '0.625rem 0',
           marginBottom: '10px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontWeight: 700,
+          borderRadius: 12,
         },
         '.no-campaign': {
           padding: '3rem 2rem',
@@ -468,9 +479,7 @@ Styles.cssRule('.staking-component', {
               height: 'auto'
             },
             '.column-custom': {
-              width: '100%',
               height: 'auto',
-              margin: '1rem 0'
             },
           },
         },

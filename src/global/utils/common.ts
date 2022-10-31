@@ -44,7 +44,7 @@ export const approveERC20Max = async (token: ITokenObject, spenderAddress: strin
 }
 
 export const getERC20Allowance = async (token: ITokenObject, spenderAddress: string) => {
-  if (!token.address) return null;
+  if (!token?.address) return null;
   let wallet = Wallet.getInstance();
   let erc20 = new Contracts.ERC20(wallet, token.address);
   let allowance = await erc20.allowance({

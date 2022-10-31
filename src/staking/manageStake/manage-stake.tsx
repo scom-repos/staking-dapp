@@ -54,17 +54,11 @@ export class ManageStake extends Module {
   private tokenBalances: any = {};
   private tokenMap: any = {};
   private lbTitle: Label;
-  private lbDuration: Label;
-  private lbMaxQty: Label;
-  private lbAvailableQty: Label;
   private lbMaturity: Label;
   private lbBalance: Label;
   private rowImgToken: HStack;
   private lbTimer: Label;
   private sectionUnlockMessage: Panel;
-  private sectionEarnedQty: Panel;
-  private colYourStakeQty: VStack;
-  private colIndividualCap: VStack;
   private sectionTokenInput: Panel;
   private inputAmount: Input;
   private btnApprove: Button;
@@ -125,13 +119,7 @@ export class ManageStake extends Module {
   private renderStakingInfo = async (info: any) => {
     if (!info || !Object.keys(info).length) {
       clearInterval(this.timer);
-      this.lbDuration.caption = '-';
-      this.lbMaxQty.caption = '-';
-      this.lbAvailableQty.caption = '-';
       this.lbMaturity.caption = '-';
-      this.colIndividualCap.visible = false;
-      this.colYourStakeQty.visible = false;
-      this.sectionEarnedQty.visible = false;
       this.btnApprove.visible = false;
       if (!isWalletConnected()) {
         this.lbBalance.caption = 'Balance: 0';
@@ -164,14 +152,11 @@ export class ManageStake extends Module {
     const defaultDecimalsOffset = 18 - (this.lockedTokenObject?.decimals || 18);
     const symbol = getLockedTokenSymbol(info, this.lockedTokenObject);
     this.tokenSymbol = symbol;
-    this.lbDuration.caption = info.duration;
     this.perAddressCap = new BigNumber(info.perAddressCap).shiftedBy(defaultDecimalsOffset).toFixed();
     this.maxQty = new BigNumber(info.maxTotalLock).shiftedBy(defaultDecimalsOffset).toNumber();
     this.stakeQty = new BigNumber(info.stakeQty).shiftedBy(defaultDecimalsOffset).toFixed();
     const totalLocked = new BigNumber(info.totalLocked).shiftedBy(defaultDecimalsOffset);
     this.availableQty = new BigNumber(this.maxQty).minus(totalLocked).toFixed();
-    this.lbMaxQty.caption = `${formatNumber(this.maxQty)} ${symbol}`;
-    this.lbAvailableQty.caption = `${formatNumber(this.availableQty)} ${symbol}`;
     this.btnApprove.visible = false;
     clearInterval(this.timer);
     if (this.currentMode === CurrentMode.UNLOCK) {
@@ -184,27 +169,10 @@ export class ManageStake extends Module {
         this.sectionUnlockMessage.visible = false;
       }
       this.lbTitle.caption = 'Manage Locked Staking';
-      this.colIndividualCap.visible = false;
-      this.colYourStakeQty.visible = true;
-      this.sectionEarnedQty.visible = true;
       this.sectionTokenInput.visible = false;
-      this.colYourStakeQty.innerHTML = '';
-      this.colYourStakeQty.appendChild(<i-label caption="Your Stake QTY" font={{ color: '#FFFFFF' }} />);
-      this.colYourStakeQty.appendChild(<i-label class="text-yellow" caption={`${formatNumber(this.stakeQty)} ${symbol}`} />);
       const maturity = moment(info.releaseTime).format('YYYY-MM-DD HH:mm:ss');
       this.lbMaturity.caption = maturity;
       this.lbTimer.caption = `Please note that you will forfeit your rewards by unstaking. You are not eligible for rewards until <b>${maturity}</b>`;
-      this.sectionEarnedQty.innerHTML = '';
-      info.rewards.forEach((rewardOption: any) => {
-        const earnedQty = formatNumber(totalCredit.times(rewardOption.rate));
-        const rewardSymbol = this.tokenMap[rewardOption.tokenAddress?.toLowerCase()]?.symbol || '';
-        this.sectionEarnedQty.appendChild(
-          <i-vstack class="w-50">
-            <i-label caption="Your Earned QTY" font={{ color: '#FFFFFF' }} />
-            <i-label class="text-yellow" caption={`${earnedQty} ${rewardSymbol}`} />
-          </i-vstack>
-        )
-      })
       this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.stakeQty);
     } else {
       this.lbTitle.caption = 'Create Locked Staking';
@@ -212,9 +180,6 @@ export class ManageStake extends Module {
       this.btnStake.caption = 'Stake';
       this.btnStake.enabled = false;
       this.sectionUnlockMessage.visible = false;
-      this.colIndividualCap.visible = true;
-      this.colYourStakeQty.visible = false;
-      this.sectionEarnedQty.visible = false;
       if (!!tokenAddress) {
         if (lockTokenType == LockTokenType.ERC20_Token) {
           await setTokenBalances();
@@ -248,9 +213,6 @@ export class ManageStake extends Module {
       } else {
         this.sectionTokenInput.visible = false;
       }
-      this.colIndividualCap.innerHTML = '';
-      this.colIndividualCap.appendChild(<i-label caption="Individual Cap" font={{ color: '#FFFFFF' }} />);
-      this.colIndividualCap.appendChild(<i-label class="text-yellow" caption={`${formatNumber(info.perAddressCap)} ${symbol}`} />);
       const setMaturityText = () => {
         const val = moment().add(info.minLockTime, 'seconds').format('YYYY-MM-DD HH:mm:ss');
         this.lbMaturity.caption = val;
@@ -456,36 +418,6 @@ export class ManageStake extends Module {
                     <i-label caption="By unlocking, you will lose your progress, are you sure?" font={{ color: '#FFFFFF' }} />
                   </i-panel>
                   <i-panel class="section-info">
-                    <i-panel visible={false}>
-                      <i-vstack class="w-100">
-                        <i-hstack verticalAlignment="center">
-                          <i-label class="mr-025" caption="Duration (days)" font={{ color: '#FFFFFF' }} />
-                          <i-icon
-                            width={18}
-                            height={18}
-                            fill="#fff"
-                            class="question-icon"
-                            name="question"
-                            tooltip={{
-                              content: 'You can lock your stake for a certain period of time.',
-                              placement: 'bottom'
-                            }}
-                          />
-                        </i-hstack>
-                        <i-label id="lbDuration" class="text-yellow" caption="-" />
-                      </i-vstack>
-                      <i-vstack class="w-50">
-                        <i-label caption="Max QTY." font={{ color: '#FFFFFF' }} />
-                        <i-label id="lbMaxQty" class="text-yellow" caption="-" />
-                      </i-vstack>
-                      <i-vstack class="w-50">
-                        <i-label caption="Available QTY." font={{ color: '#FFFFFF' }} />
-                        <i-label id="lbAvailableQty" class="text-yellow" caption="-" />
-                      </i-vstack>
-                      <i-vstack id="colYourStakeQty" class="w-50" />
-                      <i-panel id="sectionEarnedQty" class="w-100" />
-                      <i-vstack id="colIndividualCap" class="w-50" />
-                    </i-panel>
                     <i-vstack class="w-100">
                       <i-label caption="Maturity" font={{ color: '#FFFFFF' }} />
                       <i-label id="lbMaturity" class="text-yellow" caption="-" />

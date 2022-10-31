@@ -6,6 +6,7 @@ import { CampaignConfig } from './campaign';
 import { getChainId, getNetworkInfo, isWalletConnected, StakingCampaign } from '@staking/store';
 import { deployCampaign } from '@staking/staking-utils';
 import { Wallet } from '@ijstech/eth-wallet';
+import { isMultiple } from '../../config';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
@@ -38,7 +39,6 @@ export class PanelConfig extends Module {
   private $eventBus: IEventBus;
   private isNew: boolean;
   private campaigns: {[chainId:number]: StakingCampaign[]};
-  private isMultiple = true;
   private importFileElm: Label;
   private importFileErrModal: Modal;
   private importFileErr: Label;
@@ -78,7 +78,7 @@ export class PanelConfig extends Module {
 
   showInputCampaign = async (isNew: boolean, campaigns?: StakingCampaign[]) => {
     this.wrapperNetworkElm.visible = isNew;
-    this.wapperCampaignsButton.visible = this.isMultiple && !isNew;
+    this.wapperCampaignsButton.visible = isMultiple && !isNew;
     this.btnAdd.enabled = !isNew;
     this.groupBtnSaveElm.visible = !isNew;
     this.groupBtnDeployElm.visible = isNew;
@@ -156,7 +156,6 @@ export class PanelConfig extends Module {
   }
 
   private onAddCampaign = async (showLast: boolean, campaign?: StakingCampaign) => {
-    if (!this.isMultiple) return;
     const idx = Number(this.campaignConfig.length);
     if (!this.isNew) {
       this.btnAdd.enabled = false;
@@ -185,7 +184,7 @@ export class PanelConfig extends Module {
   }
 
   private onAddCampaignByClick = () => {
-    if (this.isNew) return;
+    if (this.isNew || !isMultiple) return;
     (this.importFileElm.firstChild?.firstChild as HTMLElement)?.click();
     // this.onAddCampaign();
   }
@@ -401,7 +400,7 @@ export class PanelConfig extends Module {
             <i-label caption="Please connect with your network!" font={{ color: '#FFFFFF' }} />
           </i-hstack>
           <i-panel visible={false} id="campaignElm" width="100%">
-            <i-vstack id="wapperCampaignsButton" visible={this.isMultiple} verticalAlignment="center">
+            <i-vstack id="wapperCampaignsButton" visible={isMultiple} verticalAlignment="center">
               <i-hstack gap={10} margin={{ bottom: 10 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
                 <i-hstack id="listCampaignButton" verticalAlignment="center" />
                 <i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Campaigns" onClick={() => this.onAddCampaignByClick()} />
