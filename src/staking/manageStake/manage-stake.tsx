@@ -1,6 +1,6 @@
-import { Button, Label, Input, Modal, Container, VStack, HStack, Panel, customElements, ControlElement, Module, Styles } from '@ijstech/components';
+import { Button, Input, Container, VStack, HStack, customElements, ControlElement, Module, Label } from '@ijstech/components';
 import { formatNumber, ITokenObject, IERC20ApprovalAction, limitInputNumber } from '@staking/global';
-import { getChainId, getTokenMap, getTokenBalances, isWalletConnected, setTokenBalances, LockTokenType, setStakingStatus } from '@staking/store';
+import { getTokenMap, getTokenBalances, isWalletConnected, setTokenBalances, LockTokenType, setStakingStatus } from '@staking/store';
 import { Result } from '../../result';
 import {
   lockToken,
@@ -10,16 +10,16 @@ import {
   getVaultObject,
   getVaultBalance,
   getApprovalModelAction,
+  getStakingTotalLocked,
 } from '@staking/staking-utils';
 import {
   getLockedTokenObject,
   getLockedTokenSymbol,
-  getLockedTokenIconPaths,
 } from '../common';
-import Assets from '@staking/assets';
 import { BigNumber } from '@ijstech/eth-wallet';
 import './manage-stake.css';
 import moment from 'moment';
+import { isThemeApplied } from '../../config';
 
 enum CurrentMode {
   STAKE,
@@ -36,9 +36,6 @@ declare global {
 
 @customElements('manage-stake')
 export class ManageStake extends Module {
-  private modalStake: Modal;
-  private loadingElm: Panel;
-  private containerStake: Container;
   private stakingInfo: any = {};
   private address: string;
   private lockedTokenObject: any = {};
@@ -49,22 +46,15 @@ export class ManageStake extends Module {
   private stakeQty = '0';
   private tokenSymbol = '';
   private currentMode = CurrentMode.STAKE;
-  private timer: any;
-  private chainId: number;
   private tokenBalances: any = {};
   private tokenMap: any = {};
-  private lbTitle: Label;
-  private lbMaturity: Label;
-  private lbBalance: Label;
-  private rowImgToken: HStack;
-  private lbTimer: Label;
-  private sectionUnlockMessage: Panel;
-  private sectionTokenInput: Panel;
+  private lbToken: Label;
+  private wrapperInputAmount: HStack;
   private inputAmount: Input;
   private btnApprove: Button;
   private btnStake: Button;
+  private btnUnstake: Button;
   private btnMax: Button;
-  private modalActions: Modal;
   private stakingResult: Result;
   private approvalModelAction: IERC20ApprovalAction;
   public onRefresh: any;
@@ -73,15 +63,21 @@ export class ManageStake extends Module {
     super(parent, options);
   }
 
-  showModal = async (data: any, actionKey: string) => {
+  setData = (data: any) => {
     this.address = data.address;
     this.stakingInfo = data;
-    this.onSetupPage(isWalletConnected(), actionKey);
-    if (this.currentMode === CurrentMode.UNLOCK) {
-      this.modalActions.visible = true;
-    } else {
-      this.modalStake.visible = true;
+    this.onSetupPage(isWalletConnected());
+  }
+
+  getBalance = () => {
+    return this.balance;
+  }
+
+  get actionKey() {
+    if (this.currentMode === CurrentMode.STAKE) {
+      return `#btn-stake-${this.address}`;
     }
+    return `#btn-unstake-${this.address}`;
   }
 
   private showResultMessage = (result: Result, status: 'warning' | 'success' | 'error', content?: string | Error) => {
@@ -102,15 +98,23 @@ export class ManageStake extends Module {
   }
 
   private onStake = async () => {
+    this.currentMode = CurrentMode.STAKE;
+    this.approvalModelAction.doPayAction();
+  }
+
+  private onUnstake = () => {
+    this.currentMode = CurrentMode.UNLOCK;
     this.approvalModelAction.doPayAction();
   }
 
   private onInputAmount = () => {
+    this.currentMode = CurrentMode.STAKE;
     limitInputNumber(this.inputAmount, this.lockedTokenObject?.decimals || 18);
     this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.inputAmount.value);
   }
 
   private setMaxBalance = () => {
+    this.currentMode = CurrentMode.STAKE;
     this.inputAmount.value = BigNumber.min(this.availableQty, this.balance, this.perAddressCap).toFixed();
     limitInputNumber(this.inputAmount, this.lockedTokenObject?.decimals || 18);
     this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.inputAmount.value);
@@ -118,19 +122,27 @@ export class ManageStake extends Module {
 
   private renderStakingInfo = async (info: any) => {
     if (!info || !Object.keys(info).length) {
-      clearInterval(this.timer);
-      this.lbMaturity.caption = '-';
       this.btnApprove.visible = false;
       if (!isWalletConnected()) {
-        this.lbBalance.caption = 'Balance: 0';
         this.btnMax.visible = false;
+        this.inputAmount.enabled = false;
       }
       return;
     };
+    const colorButton = isThemeApplied ? info.customColorButton : undefined;
+    const colorText = isThemeApplied ? info.customColorText || '#fff' : '#fff';
+    this.btnApprove.background = { color: `${colorButton} !important` };
+    this.btnStake.background = { color: `${colorButton} !important` };
+    this.btnUnstake.background = { color: `${colorButton} !important` };
+    this.btnMax.background = { color: `${colorButton} !important` };
+    this.lbToken.font = { color: colorText };
+    this.btnStake.id = `btn-stake-${this.address}`;
+    this.btnUnstake.id = `btn-unstake-${this.address}`;
+    this.inputAmount.id = `input-${this.address}`;
     let lpTokenData: any = {};
     let vaultTokenData: any = {};
-    const { tokenAddress, lockTokenType } = info;
-    if (tokenAddress) {
+    const { tokenAddress, lockTokenType, mode } = info;
+    if (tokenAddress && mode === 'Stake') {
       if (lockTokenType == LockTokenType.LP_Token) {
         lpTokenData = {
           'object': await getLPObject(tokenAddress),
@@ -158,104 +170,71 @@ export class ManageStake extends Module {
     const totalLocked = new BigNumber(info.totalLocked).shiftedBy(defaultDecimalsOffset);
     this.availableQty = new BigNumber(this.maxQty).minus(totalLocked).toFixed();
     this.btnApprove.visible = false;
-    clearInterval(this.timer);
-    if (this.currentMode === CurrentMode.UNLOCK) {
-      const totalCredit = new BigNumber(info.totalCredit);
-      if (totalCredit.isZero()) {
-        this.sectionUnlockMessage.visible = true;
-        this.btnStake.onClick = () => { this.modalActions.visible = true };
-      } else {
-        this.btnStake.onClick = () => this.onStake();
-        this.sectionUnlockMessage.visible = false;
-      }
-      this.lbTitle.caption = 'Manage Locked Staking';
-      this.sectionTokenInput.visible = false;
-      const maturity = moment(info.releaseTime).format('YYYY-MM-DD HH:mm:ss');
-      this.lbMaturity.caption = maturity;
-      this.lbTimer.caption = `Please note that you will forfeit your rewards by unstaking. You are not eligible for rewards until <b>${maturity}</b>`;
+    // Unstake
+    if ((CurrentMode as any)[mode.toUpperCase()] !== CurrentMode.STAKE) {
       this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.stakeQty);
+      this.btnStake.visible = false;
+      this.wrapperInputAmount.visible = false;
+      this.btnUnstake.visible = true;
     } else {
-      this.lbTitle.caption = 'Create Locked Staking';
-      this.btnStake.onClick = () => this.onStake();
-      this.btnStake.caption = 'Stake';
-      this.btnStake.enabled = false;
-      this.sectionUnlockMessage.visible = false;
-      if (!!tokenAddress) {
-        if (lockTokenType == LockTokenType.ERC20_Token) {
-          await setTokenBalances();
-          let balances = getTokenBalances();
-          this.tokenBalances = Object.keys(balances).reduce((accumulator: any, key) => {
-            accumulator[key.toLowerCase()] = balances[key];
-            return accumulator;
-          }, {});
-          this.balance = this.tokenBalances[tokenAddress] || '0';
-        } else if (lockTokenType == LockTokenType.LP_Token) {
-          this.balance = new BigNumber(lpTokenData.balance || 0).shiftedBy(defaultDecimalsOffset).toFixed();
-        } else if (lockTokenType == LockTokenType.VAULT_Token) {
-          this.balance = new BigNumber(vaultTokenData.balance || 0).shiftedBy(defaultDecimalsOffset).toFixed();
-        }
-        this.btnMax.visible = true;
-        this.btnMax.enabled = new BigNumber(this.balance).gt(0);
-        this.lbBalance.caption = `Balance: ${formatNumber(this.balance)}`;
-        this.rowImgToken.innerHTML = '';
-        const lockedTokenIconPaths = getLockedTokenIconPaths(info, this.lockedTokenObject, this.chainId, this.tokenMap);
-        lockedTokenIconPaths.forEach((tokenPath: string) => {
-          this.rowImgToken.appendChild(
-            <i-image
-              width={28}
-              class="inline-block img-token"
-              url={Assets.fullPath(tokenPath)}
-            />
-          )
-        });
-        this.rowImgToken.appendChild(<i-label class="text-yellow" caption={symbol} />)
-        this.sectionTokenInput.visible = true;
-      } else {
-        this.sectionTokenInput.visible = false;
-      }
-      const setMaturityText = () => {
-        const val = moment().add(info.minLockTime, 'seconds').format('YYYY-MM-DD HH:mm:ss');
-        this.lbMaturity.caption = val;
-      }
-      setMaturityText();
-      this.timer = setInterval(setMaturityText, 1000);
+      this.btnStake.visible = true;
+      this.wrapperInputAmount.visible = true;
+      this.btnUnstake.visible = false;
     }
+    // Stake
+    if (tokenAddress && mode === 'Stake') {
+      if (lockTokenType == LockTokenType.ERC20_Token) {
+        await setTokenBalances();
+        let balances = getTokenBalances();
+        this.tokenBalances = Object.keys(balances).reduce((accumulator: any, key) => {
+          accumulator[key.toLowerCase()] = balances[key];
+          return accumulator;
+        }, {});
+        this.balance = this.tokenBalances[tokenAddress] || '0';
+      } else if (lockTokenType == LockTokenType.LP_Token) {
+        this.balance = new BigNumber(lpTokenData.balance || 0).shiftedBy(defaultDecimalsOffset).toFixed();
+      } else if (lockTokenType == LockTokenType.VAULT_Token) {
+        this.balance = new BigNumber(vaultTokenData.balance || 0).shiftedBy(defaultDecimalsOffset).toFixed();
+      }
+      this.btnMax.visible = true;
+      this.lbToken.caption = symbol;
+    }
+    this.updateEnableInput();
   }
 
-  private onSetupPage = async (connected: boolean, actionKey: string) => {
+  private onSetupPage = async (connected: boolean) => {
     if (!connected) {
       this.btnStake.enabled = false;
+      this.btnUnstake.enabled = false;
       this.btnApprove.visible = false;
       this.inputAmount.enabled = false;
       this.renderStakingInfo(null);
-      this.loadingElm.visible = false;
       return;
     }
-    this.loadingElm.visible = true;
-    this.inputAmount.enabled = true;
     this.tokenMap = getTokenMap();
-    this.chainId = getChainId();
-    this.currentMode = (CurrentMode as any)[this.stakingInfo.mode.toUpperCase()];
-    await this.initApprovalModelAction(actionKey);
+    await this.initApprovalModelAction();
     await this.renderStakingInfo(this.stakingInfo);
-    this.loadingElm.visible = false;
   }
 
-  private closeStakeModal = () => {
-    this.modalStake.visible = false;
+  private updateEnableInput = async () => {
+    if (this.stakingInfo?.mode !== 'Stake') return;
+    const totalLocked = await getStakingTotalLocked(this.address);
+    const activeStartTime = this.stakingInfo ? this.stakingInfo.startOfEntryPeriod : 0;
+    const activeEndTime = this.stakingInfo ? this.stakingInfo.endOfEntryPeriod : 0;
+    const lockedTokenDecimals = this.lockedTokenObject?.decimals || 18;
+    const defaultDecimalsOffset = 18 - lockedTokenDecimals;
+    const optionQty = new BigNumber(this.stakingInfo.maxTotalLock).minus(totalLocked).shiftedBy(defaultDecimalsOffset);
+    const isStarted = moment(activeStartTime).diff(moment()) <= 0;
+    const isClosed = moment(activeEndTime).diff(moment()) <= 0;
+    const enabled = (isStarted && !(optionQty.lte(0) || isClosed));
+    this.inputAmount.enabled = enabled;
+    this.btnMax.enabled = enabled && new BigNumber(this.balance).gt(0);
   }
 
-  private closeModal = () => {
-    this.modalActions.visible = false;
-  }
-
-  async initApprovalModelAction(actionKey: string) {
+  async initApprovalModelAction() {
     this.approvalModelAction = getApprovalModelAction(this.address, {
       sender: this,
       payAction: async () => {
-        if (this.modalActions.visible) {
-          this.modalActions.visible = false;
-        }
         this.showResultMessage(this.stakingResult, 'warning', `${this.currentMode === CurrentMode.STAKE ? 'Stake' : 'Unlock'} ${this.tokenSymbol}`);
         if (this.currentMode === CurrentMode.STAKE) {
           lockToken(this.lockedTokenObject, this.inputAmount.value, this.address);
@@ -268,14 +247,15 @@ export class ManageStake extends Module {
           this.btnApprove.caption = `Approve ${token.symbol}`;
           this.btnApprove.visible = true;
           this.btnApprove.enabled = true;
-        }
-        else {
+        } else {
           this.btnApprove.visible = false;
         }
         this.btnStake.enabled = false;
+        this.btnUnstake.enabled = false;
       },
       onToBePaid: async (token: ITokenObject) => {
         this.btnApprove.visible = false;
+        const isClosed = moment(this.stakingInfo?.endOfEntryPeriod || 0).diff(moment()) <= 0;
         if (this.currentMode === CurrentMode.STAKE) {
           const amount = new BigNumber(this.inputAmount.value);
           if (amount.gt(this.balance)) {
@@ -287,51 +267,49 @@ export class ManageStake extends Module {
           if (amount.isNaN() || amount.lte(0) || amount.gt(BigNumber.min(this.availableQty, this.balance, this.perAddressCap))) {
             this.btnStake.enabled = false;
           } else {
-            this.btnStake.enabled = true;
+            this.btnStake.enabled = !isClosed;
           }
-        } else {
-          this.btnStake.caption = 'Unstake';
-          this.btnStake.enabled = new BigNumber(this.stakeQty).gt(0);
         }
+        this.btnUnstake.enabled = this.stakingInfo.mode !== 'Stake' && new BigNumber(this.stakeQty).gt(0);
       },
       onApproving: async (token: ITokenObject, receipt?: string) => {
         if (receipt) {
-          this.modalStake.closeOnBackdropClick = false;
-          this.modalActions.closeOnBackdropClick = false;
           this.showResultMessage(this.stakingResult, 'success', receipt);
           this.btnApprove.caption = `Approving`;
           this.btnApprove.enabled = false;
           this.btnApprove.rightIcon.visible = true;
           this.btnMax.enabled = false;
           this.inputAmount.enabled = false;
-          setStakingStatus(actionKey, true, 'Approving');
         }
       },
       onApproved: async (token: ITokenObject) => {
         await setTokenBalances();
+        await this.updateEnableInput();
         this.btnApprove.rightIcon.visible = false;
         this.btnApprove.visible = false;
-        this.btnMax.enabled = new BigNumber(this.balance).gt(0);
-        this.inputAmount.enabled = true;
-        setStakingStatus(actionKey, false, 'Stake');
       },
       onApprovingError: async (token: ITokenObject, err: Error) => {
         this.showResultMessage(this.stakingResult, 'error', err);
         this.btnApprove.rightIcon.visible = false;
         this.btnMax.enabled = new BigNumber(this.balance).gt(0);
         this.inputAmount.enabled = true;
-        setStakingStatus(actionKey, false, 'Stake');
       },
       onPaying: async (receipt?: string) => {
         if (receipt) {
           this.showResultMessage(this.stakingResult, 'success', receipt);
           this.inputAmount.enabled = false;
           this.btnMax.enabled = false;
-          const caption = this.currentMode === CurrentMode.STAKE ? 'Staking' : 'Unstaking';
-          this.btnStake.caption = caption;
-          this.btnStake.enabled = false;
-          this.btnStake.rightIcon.visible = true;
-          setStakingStatus(actionKey, true, caption);
+          if (this.currentMode === CurrentMode.STAKE) {
+            this.btnStake.caption = 'Staking';
+            this.btnStake.rightIcon.visible = true;
+            setStakingStatus(this.actionKey, true, 'Staking');
+            this.btnUnstake.enabled = false;
+          } else {
+            this.btnUnstake.caption = 'Unstaking';
+            this.btnUnstake.rightIcon.visible = true;
+            setStakingStatus(this.actionKey, true, 'Unstaking');
+            this.btnStake.enabled = false;
+          }
         }
       },
       onPaid: async () => {
@@ -339,23 +317,32 @@ export class ManageStake extends Module {
         if (this.onRefresh) {
           await setTokenBalances();
           await this.onRefresh();
-          setStakingStatus(actionKey, false, caption);
+          setStakingStatus(this.actionKey, false, caption);
         }
+        if (this.currentMode === CurrentMode.STAKE) {
+          this.btnStake.caption = 'Stake';
+          this.btnStake.rightIcon.visible = false;
+        } else {
+          this.btnUnstake.caption = 'Unstake';
+          this.btnUnstake.rightIcon.visible = false;
+        }
+        await this.updateEnableInput();
         this.inputAmount.value = '';
-        this.inputAmount.enabled = true;
-        this.btnMax.enabled = true;
-        this.btnStake.caption = caption;
-        this.btnStake.rightIcon.visible = false;
-        this.modalActions.visible = false;
+        this.btnStake.enabled = false;
+        this.btnUnstake.enabled = this.stakingInfo.mode !== 'Stake' && new BigNumber(this.stakeQty).gt(0);
       },
       onPayingError: async (err: Error) => {
-        this.inputAmount.enabled = true;
-        this.btnMax.enabled = true;
+        await this.updateEnableInput();
         const caption = this.currentMode === CurrentMode.STAKE ? 'Stake' : 'Unstake';
-        this.btnStake.caption = caption;
-        this.btnStake.rightIcon.visible = false;
+        if (this.currentMode === CurrentMode.STAKE) {
+          this.btnStake.caption = 'Stake';
+          this.btnStake.rightIcon.visible = false;
+        } else {
+          this.btnUnstake.caption = 'Unstake';
+          this.btnUnstake.rightIcon.visible = false;
+        }
         this.showResultMessage(this.stakingResult, 'error', err);
-        setStakingStatus(actionKey, false, caption);
+        setStakingStatus(this.actionKey, false, caption);
       }
     });
   }
@@ -363,152 +350,73 @@ export class ManageStake extends Module {
   init() {
     super.init();
     this.stakingResult = new Result();
-    this.stakingResult.onCustomClose = () => {
-      this.modalStake.closeOnBackdropClick = true;
-      this.modalActions.closeOnBackdropClick = true;
-    }    
     this.appendChild(this.stakingResult);
   }
 
   render() {
     return (
-      <i-panel class="manage-stake">
-        <i-modal
-          id="modalStake"
-          class="stake-modal"
-          closeIcon={{ name: 'times' }}
-        >
-          <i-panel id="containerStake">
-            <i-hstack horizontalAlignment="center">
-              <i-vstack class="manage-wrapper">
-                <i-panel class="main-content">
-                  <i-vstack id="loadingElm" class="i-loading-overlay" background={{ color: '#192046' }}>
-                    <i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
-                      <i-icon
-                        class="i-loading-spinner_icon"
-                        image={{ url: Assets.fullPath('img/loading.svg'), width: 36, height: 36 }}
-                      ></i-icon>
-                      <i-label
-                        caption="Loading..." font={{ color: '#FD4A4C', size: '1.5em' }}
-                        class="i-loading-spinner_text"
-                      ></i-label>
-                    </i-vstack>
-                  </i-vstack>
-                  <i-panel class="manage-header">
-                    <i-icon width={20} height={20} fill="#fff" class="cursor-pointer pointer" name="arrow-left" onClick={this.closeStakeModal} />
-                    <i-label
-                      id="lbTitle"
-                      caption="Create Locked Staking"
-                      class="text-yellow"
-                    />
-                    <i-icon
-                      width={20}
-                      height={20}
-                      fill="#fff"
-                      class="question-icon"
-                      name="question"
-                      tooltip={{
-                        content: 'You can lock your stake for a certain period of time.',
-                        placement: 'bottom'
-                      }}
-                    />
-                  </i-panel>
-                  <i-panel id="sectionUnlockMessage" visible={true} class="description">
-                    <i-label caption="Note that you will forfeit your rewards if you unstake before the maturity date." font={{ color: '#FFFFFF' }} />
-                    <i-label caption="By unlocking, you will lose your progress, are you sure?" font={{ color: '#FFFFFF' }} />
-                  </i-panel>
-                  <i-panel class="section-info">
-                    <i-vstack class="w-100">
-                      <i-label caption="Maturity" font={{ color: '#FFFFFF' }} />
-                      <i-label id="lbMaturity" class="text-yellow" caption="-" />
-                    </i-vstack>
-                  </i-panel>
-                  <i-panel id="sectionTokenInput" class="input--token-box mb-1">
-                    <i-hstack class="mb-075">
-                      <i-label caption="Input" font={{ color: '#FFFFFF' }} />
-                      <i-label id="lbBalance" class="text-yellow text-normal w-100 text-right" caption="-" />
-                    </i-hstack>
-                    <i-hstack>
-                      <i-input
-                        id="inputAmount"
-                        inputType="number"
-                        placeholder="0.0"
-                        class="token-input w-100 mr-025"
-                        width="100%"
-                        onChanged={() => this.onInputAmount()}
-                      />
-                      <i-button
-                        id="btnMax"
-                        caption="Max"
-                        enabled={false}
-                        class="btn-os btn-max"
-                        onClick={() => this.setMaxBalance()}
-                      />
-                      <i-hstack id="rowImgToken" verticalAlignment="center" />
-                    </i-hstack>
-                  </i-panel>
-                  <i-hstack>
-                    <i-button
-                      id="btnApprove"
-                      caption="Approve Token"
-                      enabled={false}
-                      visible={false}
-                      width="100%"
-                      class="btn-os btn-approve mb-075 mr-025"
-                      rightIcon={{ spin: true, visible: false }}
-                      onClick={() => this.onApproveToken()}
-                    />
-                    <i-button
-                      id="btnStake"
-                      caption="Stake"
-                      enabled={false}
-                      width="100%"
-                      rightIcon={{ spin: true, visible: false }}
-                      class="btn-os btn-approve mb-075"
-                    />
-                  </i-hstack>
-                </i-panel>
-              </i-vstack>
-            </i-hstack>
-          </i-panel>
-        </i-modal>
-        <i-modal
-          id="modalActions"
-          class="custom-modal"
-          closeIcon={{ name: 'times' }}
-        >
-          <i-panel class="manage-header">
-            <i-icon
-              width={24}
-              height={24}
-              name="times"
-              class="cursor-pointer"
-              onClick={() => this.closeModal()}
+      <i-panel class="staking-manage-stake">
+        <i-hstack gap={10} verticalAlignment="center" horizontalAlignment="center">
+          <i-hstack id="wrapperInputAmount" gap={4} width={280} height={36} padding={{ right: 8 }} background={{ color: '#232B5A' }} border={{ radius: 8 }} verticalAlignment="center" horizontalAlignment="space-between">
+            <i-input
+              id="inputAmount"
+              inputType="number"
+              placeholder="0.0"
+              class="staking-token-input"
+              width="100%"
+              height="100%"
+              onChanged={() => this.onInputAmount()}
             />
-          </i-panel>
-          <i-panel class="i-modal_content">
-            <i-panel class="mt-1">
-              <i-hstack verticalAlignment="center" horizontalAlignment="center" class="mb-1">
-                <i-image width={80} height={80} url={Assets.fullPath('img/warning-icon.png')} />
-              </i-hstack>
-              <i-panel class="description-time">
-                <i-label id="lbTimer" caption="Please note that you will forfeit your rewards by unstaking. You are not eligible for rewards until" />
-              </i-panel>
-              <i-hstack verticalAlignment="center" horizontalAlignment="center" class="group-btn">
-                <i-button
-                  caption="Cancel"
-                  class="btn-os btn-cancel"
-                  onClick={() => this.closeModal()}
-                />
-                <i-button
-                  caption="Proceed"
-                  class="btn-os btn-submit"
-                  onClick={() => this.onStake()}
-                />
-              </i-hstack>
-            </i-panel>
-          </i-panel>
-        </i-modal>
+            <i-hstack gap={4} verticalAlignment="center">
+              <i-button
+                id="btnMax"
+                caption="Max"
+                enabled={false}
+                class="btn-os"
+                width={45}
+                minHeight={25}
+                onClick={() => this.setMaxBalance()}
+              />
+              <i-label id="lbToken" font={{ size: '14px' }} class="opacity-50" />
+            </i-hstack>
+          </i-hstack>
+          <i-hstack gap={10} width="calc(100% - 290px)">
+            <i-button
+              id="btnApprove"
+              caption="Approve"
+              enabled={false}
+              visible={false}
+              width="100%"
+              minHeight={36}
+              border={{ radius: 12 }}
+              rightIcon={{ spin: true, visible: false, fill: '#fff' }}
+              class="btn-os"
+              onClick={() => this.onApproveToken()}
+            />
+            <i-button
+              id="btnStake"
+              caption="Stake"
+              enabled={false}
+              width="100%"
+              minHeight={36}
+              border={{ radius: 12 }}
+              rightIcon={{ spin: true, visible: false, fill: '#fff' }}
+              class="btn-os"
+              onClick={() => this.onStake()}
+            />
+            <i-button
+              id="btnUnstake"
+              caption="Unstake"
+              enabled={false}
+              width="100%"
+              minHeight={36}
+              border={{ radius: 12 }}
+              rightIcon={{ spin: true, visible: false, fill: '#fff' }}
+              class="btn-os"
+              onClick={() => this.onUnstake()}
+            />
+          </i-hstack>
+        </i-hstack>
       </i-panel>
     )
   }

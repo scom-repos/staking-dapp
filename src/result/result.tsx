@@ -129,7 +129,6 @@ export class Result extends Module {
       const label = await Label.create();
       label.caption = 'Transaction Submitted';
       label.classList.add("waiting-txt");
-      label.classList.add("mb");
       mainSection.appendChild(label);
 
       const contentSection = await Panel.create();
@@ -144,9 +143,9 @@ export class Result extends Module {
         const section = new VStack();
 
         const label1 = await Label.create({
-          caption: this.message.txtHash.substr(0, 33)
+          caption: this.message.txtHash.substr(0, 33),
+          margin: { bottom: 4 }
         });
-        label1.classList.add("mb-1");
         section.appendChild(label1);
 
         const label2 = await Label.create({
@@ -160,7 +159,7 @@ export class Result extends Module {
         });
 
         link.onClick = this.buildLink.bind(this);
-        link.classList.add("red-link", "block", "mt-1", "pointer");
+        link.classList.add("red-link", "block", "pointer");
         section.appendChild(link);
         contentSection.appendChild(section);
       }
@@ -224,12 +223,12 @@ export class Result extends Module {
 	render() {
 		return (
       <i-modal
-        id='confirmModal'
+        id="confirmModal"
         closeIcon={{ name: 'times' }}
-        class='dark-modal confirm-modal'
+        class="confirm-modal"
         minHeight="280px"
       >
-        <i-panel id="mainContent" class="i-modal_content"></i-panel>
+        <i-panel id="mainContent" class="i-modal_content" />
       </i-modal>
 		)
 	}

@@ -64,10 +64,77 @@ Styles.fontFace({
   fontStyle: 'normal'
 })
 
+Styles.fontFace({
+  fontFamily: "Montserrat Regular",
+  src: `url("${Assets.fullPath('fonts/montserrat/Montserrat-Regular.ttf')}") format("truetype")`,
+  fontWeight: 'nomal',
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Montserrat Bold",
+  src: `url("${Assets.fullPath('fonts/montserrat/Montserrat-Bold.ttf')}") format("truetype")`,
+  fontWeight: 'bold',
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Montserrat Light",
+  src: `url("${Assets.fullPath('fonts/montserrat/Montserrat-Light.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Montserrat Medium",
+  src: `url("${Assets.fullPath('fonts/montserrat/Montserrat-Medium.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Montserrat SemiBold",
+  src: `url("${Assets.fullPath('fonts/montserrat/Montserrat-SemiBold.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Raleway Regular",
+  src: `url("${Assets.fullPath('fonts/raleway/Raleway-Regular.ttf')}") format("truetype")`,
+  fontWeight: 'nomal',
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Raleway Bold",
+  src: `url("${Assets.fullPath('fonts/raleway/Raleway-Bold.ttf')}") format("truetype")`,
+  fontWeight: 'bold',
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Raleway Light",
+  src: `url("${Assets.fullPath('fonts/raleway/Raleway-Light.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Raleway Medium",
+  src: `url("${Assets.fullPath('fonts/raleway/Raleway-Medium.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
+Styles.fontFace({
+  fontFamily: "Raleway SemiBold",
+  src: `url("${Assets.fullPath('fonts/raleway/Raleway-SemiBold.ttf')}") format("truetype")`,
+  fontStyle: 'normal'
+})
+
 Styles.cssRule('.staking-component', {
   $nest: {
-    '*': {
-      fontFamily: 'Proxima Nova',
+    'i-label': {
+      fontFamily: 'Raleway Regular',
+    },
+    'span': {
+      letterSpacing: '0.15px',
     },
     '#stakingElm': {
       background: '#0c1234',
@@ -88,6 +155,8 @@ Styles.cssRule('.staking-component', {
       color: '#fff',
       transition: 'background .3s ease',
       fontSize: '1rem',
+      fontWeight: 'bold',
+      fontFamily: 'Raleway Bold',
       $nest: {
         'i-icon.loading-icon': {
           marginInline: '0.25rem',
@@ -170,8 +239,8 @@ Styles.cssRule('.staking-component', {
     '.wrapper': {
       width: '100%',
       height: '100%',
-      maxWidth: 720,
-      maxHeight: 405,
+      maxWidth: 700,
+      maxHeight: 321,
       $nest: {
         '.sticker': {
           position: 'absolute',
@@ -218,101 +287,6 @@ Styles.cssRule('.staking-component', {
             },
           },
         },
-        '.banner': {
-          position: 'relative',
-          height: '100%',
-          minHeight: '485px',
-          padding: '2.5rem 0.75rem',
-        },
-        '.campaign-name': {
-          $nest: {
-            'i-image': {
-              marginRight: '0.25rem',
-            },
-            'i-label': {
-              overflow: 'hidden',
-              overflowWrap: 'break-word'
-            },
-            'i-label > *': {
-              fontSize: '1.25rem',
-              fontWeight: '700',
-            },
-          },
-        },
-        '.campaign-description': {
-          paddingBlock: '2.5rem',
-          overflow: 'hidden',
-          overflowWrap: 'break-word'
-        },
-        '.staking-description': {
-          overflow: 'hidden',
-          overflowWrap: 'break-word',
-          paddingInline: '0.75rem',
-        },
-        '.row-item': {
-          marginBlock: '0.15rem',
-        },
-        '.col-item': {
-          display: 'flex',
-          alignItems: 'flex-start',
-          marginRight: '0.25rem',
-          width: 'auto',
-          $nest: {
-            '.custom-icon': {
-              display: 'flex',
-              width: '14px',
-              height: '14px',
-              marginRight: '0.15rem',
-              marginTop: '0.1rem',
-            },
-          },
-        },
-        '.simplified': {
-          marginTop: '0.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          $nest: {
-            '.simplified-description': {
-              display: 'flex',
-              alignItems: 'center',
-              marginInline: 'auto',
-              $nest: {
-                'i-image': {
-                  display: 'flex',
-                  marginLeft: '0.25rem',
-                },
-              },
-            },
-            '.simplified-link': {
-              textAlign: 'center',
-              $nest: {
-                'a': {
-                  color: '#fff',
-                  fontWeight: 'bold',
-                  fontFamily: 'Proxima Nova',
-                  marginInline: '0.25rem',
-                  textDecorationLine: 'underline',
-                },
-              },
-            },
-          },
-        },
-        '.get-token': {
-          cursor: 'pointer',
-          justifyContent: 'center',
-          marginBlock: '1rem',
-          marginInline: 'auto',
-          width: 'fit-content',
-          $nest: {
-            'i-label': {
-              marginRight: '0.25rem',
-            },
-            'i-image': {
-              marginRight: '0.25rem',
-            },
-          },
-        },
         '.custom-timer': {
           display: 'flex',
           $nest: {
@@ -325,6 +299,7 @@ Styles.cssRule('.staking-component', {
               minWidth: 20,
               height: 20,
               fontSize: 14,
+              fontFamily: 'Montserrat Regular',
             },
             '.timer-unit': {
               display: 'flex',
@@ -342,54 +317,8 @@ Styles.cssRule('.staking-component', {
           paddingBottom: '1rem',
           position: 'relative',
         },
-        '.header-info': {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          paddingTop: '1rem',
-          $nest: {
-            'i-hstack i-label > *': {
-              fontSize: '1.25rem',
-              marginLeft: '0.25rem',
-              lineHeight: '1.875rem',
-            },
-          },
-        },
-        '.container-custom': {
-          display: 'flex',
-          alignItems: 'stretch',
-        },
-        '.row-custom': {
-          width: '100%',
-        },
-        '.column-custom': {
-          padding: 20,
-          height: '100%'
-        },
-        '.img-custom': {
-          display: 'flex',
-          justifyContent: 'center',
-          paddingTop: '1.5rem',
-          marginBottom: '0.75rem',
-        },
-        '.info-stake': {
-          width: '100%',
-          padding: '0.5rem 0.75rem',
-          $nest: {
-            'i-hstack': {
-              padding: '0.175rem 0',
-            },
-            'i-label:first-child': {
-              display: 'flex',
-            },
-            'i-label:last-child': {
-              fontWeight: 700,
-              textAlign: 'right',
-            },
-          },
-        },
         '.btn-stake': {
-          width: 320,
+          width: 370,
           maxWidth: '100%',
           padding: '0.625rem 0',
           marginBottom: '10px',
@@ -469,28 +398,6 @@ Styles.cssRule('.staking-component', {
       display: 'block',
       textAlign: 'center',
       paddingTop: '1rem',
-    },
-    '@media (max-width: 1240px)': {
-      $nest: {
-        '.wrapper': {
-          $nest: {
-            '.banner': {
-              minHeight: 'auto',
-              height: 'auto'
-            },
-            '.column-custom': {
-              height: 'auto',
-            },
-          },
-        },
-      },
-    },
-    '@media (max-width: 992px)': {
-      $nest: {
-        '.header': {
-          flexDirection: 'column',
-        },
-      },
     },
   }
 })

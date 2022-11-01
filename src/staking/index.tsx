@@ -1,6 +1,6 @@
-import { Module, Panel, Icon, Button, Label, VStack, HStack, Container, customElements, ControlElement, IEventBus, application, customModule, Styles, Modal, CarouselSlider } from '@ijstech/components';
+import { Module, Panel, Icon, Button, Label, VStack, HStack, Container, customElements, ControlElement, IEventBus, application, customModule, Modal, Input } from '@ijstech/components';
 import { formatNumber, formatDate, registerSendTxEvents, TokenMapType, PageBlock, EventId } from '@staking/global';
-import { InfuraId, Networks, getChainId, getTokenMap, getTokenIconPath, viewOnExplorerByAddress, isWalletConnected, getNetworkInfo, setTokenMap, getDefaultChainId, hasWallet, connectWallet, setDataFromSCConfig, setCurrentChainId, tokenSymbol, LockTokenType, getStakingStatus, StakingCampaign, Reward, fallBackUrl } from '@staking/store';
+import { InfuraId, Networks, getChainId, getTokenMap, getTokenIconPath, viewOnExplorerByAddress, isWalletConnected, getNetworkInfo, setTokenMap, getDefaultChainId, hasWallet, connectWallet, setDataFromSCConfig, setCurrentChainId, tokenSymbol, LockTokenType, getStakingStatus, StakingCampaign, fallBackUrl } from '@staking/store';
 import {
 	getStakingTotalLocked,
 	getLPObject,
@@ -277,45 +277,6 @@ export class StakingBlock extends Module implements PageBlock {
 		result.showModal();
 	}
 
-	private onStake = async (option: any) => {
-		const manageStake = new ManageStake();
-		manageStake.onRefresh = () => this.onSetupPage(isWalletConnected(), true);
-		this.manageStakeElm.clearInnerHTML();
-		this.manageStakeElm.appendChild(manageStake);
-		manageStake.showModal(option, `#btn-${option.address}`);
-	}
-
-	private onUnstake = async (btnUnstake: Button, data: any) => {
-		if (data.option.mode !== 'Claim') {
-			this.onStake(data.option);
-		} else {
-			this.showResultMessage(this.stakingResult, 'warning', `Unstake ${data.lockedTokenSymbol}`);
-			const callBack = async (err: any, reply: any) => {
-				if (err) {
-					this.showResultMessage(this.stakingResult, 'error', err);
-				} else {
-					this.showResultMessage(this.stakingResult, 'success', reply);
-					btnUnstake.enabled = false;
-					btnUnstake.rightIcon.visible = true;
-				}
-			};
-
-			const confirmationCallBack = async (receipt: any) => {
-				await this.onSetupPage(isWalletConnected(), true);
-				if (!btnUnstake) return;
-				btnUnstake.rightIcon.visible = false;
-				btnUnstake.enabled = true;
-			};
-
-			registerSendTxEvents({
-				transactionHash: callBack,
-				confirmation: confirmationCallBack
-			});
-
-			withdrawToken(data.option.address, callBack);
-		}
-	}
-
 	private onClaim = async (btnClaim: Button, data: any) => {
 		this.showResultMessage(this.stakingResult, 'warning', `Claim ${data.rewardSymbol}`);
 		const callBack = async (err: any, reply: any) => {
@@ -378,6 +339,12 @@ export class StakingBlock extends Module implements PageBlock {
 		this.stakingComponent.appendChild(this.pnlConfig);
 		this.stakingResult = new Result();
 		this.stakingComponent.appendChild(this.stakingResult);
+		this.stakingResult.visible = false;
+		this.showResultMessage(this.stakingResult, 'warning', '');
+		setTimeout(() => {
+			this.stakingResult.closeModal();
+			this.stakingResult.visible = true;
+		}, 100)
 		this.initWalletData();
 		setDataFromSCConfig(Networks, InfuraId);
 		setCurrentChainId(getDefaultChainId());
@@ -434,9 +401,9 @@ export class StakingBlock extends Module implements PageBlock {
 					{
 						isBtnShown ? (
 							<i-hstack gap={10} margin={{ top: 10 }} verticalAlignment="center" horizontalAlignment="center">
-								<i-button maxWidth={220} caption="Add New Campaign" class="btn-os btn-stake" onClick={() => this.onEditCampaign(true)} />
-								<i-button maxWidth={220} caption="Import New Campaign" class="btn-os btn-stake" onClick={() => onImportCampaign(true)} />
-								<i-button maxWidth={220} caption="Import Existing Campaign" class="btn-os btn-stake" onClick={() => onImportCampaign(false)} />
+								<i-button maxWidth={220} caption="Add New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => this.onEditCampaign(true)} />
+								<i-button maxWidth={220} caption="Import New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => onImportCampaign(true)} />
+								<i-button maxWidth={220} caption="Import Existing Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => onImportCampaign(false)} />
 								{ importFileElm }
 								<i-modal id="importFileErrModal" maxWidth="100%" width={420} title="Import Campaign Error" closeIcon={{ name: 'times' }}>
 									<i-vstack gap={20} margin={{ bottom: 10 }} verticalAlignment="center" horizontalAlignment="center">
@@ -477,6 +444,7 @@ export class StakingBlock extends Module implements PageBlock {
 			this.stakingElm.clearInnerHTML();
 			this.stakingElm.appendChild(this.noCampaignSection);
 			this.noCampaignSection.visible = true;
+			this.removeTimer();
 			return;
 		}
 
@@ -592,12 +560,27 @@ export class StakingBlock extends Module implements PageBlock {
 					const _totalLocked = await getStakingTotalLocked(o.address);
 					totalLocked[o.address] = _totalLocked;
 					const optionQty = new BigNumber(o.maxTotalLock).minus(_totalLocked).shiftedBy(defaultDecimalsOffset);
-					const btnStake = document.querySelector(`#btn-${o.address}`) as Button;
-					const isStaking = getStakingStatus(`#btn-${o.address}`).value;
-					if (btnStake && btnStake.caption === 'Stake') {
-						btnStake.enabled = !isStaking && !(!isStarted || o.mode === 'Stake' && (optionQty.lte(0) || isClosed));
-					} else if (btnStake && btnStake.caption === 'Unstake') {
-						btnStake.enabled = !isStaking && o.stakeQty != "0";
+					if (o.mode === 'Stake') {
+						const keyStake = `#btn-stake-${o.address}`;
+						const btnStake = this.querySelector(keyStake) as Button;
+						const isStaking = getStakingStatus(keyStake).value;
+						if (btnStake) {
+							let isValidInput = false;
+							const inputElm = this.querySelector(`#input-${o.address}`) as Input;
+							if (inputElm) {
+								const manageStake = this.querySelector(`#manage-stake-${o.address}`) as ManageStake;
+								const inputVal = new BigNumber(inputElm.value || 0);
+								isValidInput = inputVal.gt(0) && inputVal.lte(manageStake.getBalance());
+							}
+							btnStake.enabled = !isStaking && isValidInput && (isStarted && !(optionQty.lte(0) || isClosed));
+						}
+					} else {
+						const keyUnstake = `#btn-unstake-${o.address}`;
+						const btnUnstake = this.querySelector(keyUnstake) as Button;
+						const isUnstaking = getStakingStatus(keyUnstake).value;
+						if (btnUnstake) {
+							btnUnstake.enabled = !isUnstaking && o.mode !== 'Stake' && Number(o.stakeQty) != 0;
+						}
 					}
 					if (isClosed) {
 						if (stickerLabels[i].caption !== 'Closed') {
@@ -659,31 +642,13 @@ export class StakingBlock extends Module implements PageBlock {
 			this.listActiveTimer.push(setInterval(setTimer, 2000));
 
 			const stakingsElm = await Promise.all(options.map(async (option: any, optionIdx: number) => {
-					const key = `btn-${option.address}`;
-					const btnStake = await Button.create({
-						caption: this.getBtnText(key, 'Stake'),
-						background: { color: `${colorButton} !important` },
-						font: { color: colorText },
-						rightIcon: { spin: true, fill: colorText, visible: getStakingStatus(key).value }
-					});
-					const btnUnstake = await Button.create({
-						caption: this.getBtnText(key, 'Unstake'),
-						background: { color: `${colorButton} !important` },
-						font: { color: colorText },
-						rightIcon: { spin: true, fill: colorText, visible: getStakingStatus(key).value }
-					});
-					if (option.mode === 'Stake') {
-						btnUnstake.visible = false;
-						btnStake.id = key;
-						btnStake.enabled = !isClosed;
-						btnStake.classList.add('btn-os', 'btn-stake');
-						btnStake.onClick = () => this.onStake({ ...campaign, ...option });
-					} else {
-						btnStake.visible = false;
-						btnUnstake.id = key;
-						btnUnstake.classList.add('btn-os', 'btn-stake');
-						btnUnstake.onClick = () => this.onUnstake(btnUnstake, { option: { ...campaign, ...option }, lockedTokenSymbol });
-					}
+					const manageStake = new ManageStake();
+					manageStake.id = `manage-stake-${option.address}`;
+					manageStake.width = '100%';
+					manageStake.onRefresh = () => this.onSetupPage(isWalletConnected(), true);
+					this.manageStakeElm.clearInnerHTML();
+					this.manageStakeElm.appendChild(manageStake);
+					manageStake.setData({ ...campaign, ...option });
 
 					const isClaim = option.mode === 'Claim';
 
@@ -693,24 +658,27 @@ export class StakingBlock extends Module implements PageBlock {
 
 					const claimStakedRow = await HStack.create({ verticalAlignment: 'center', horizontalAlignment: 'space-between' });
 					claimStakedRow.appendChild(<i-label caption="You Staked" font={{ size: '16px', color: colorText }} />);
-					claimStakedRow.appendChild(<i-label caption={`${formatNumber(new BigNumber(option.stakeQty).shiftedBy(defaultDecimalsOffset))} ${lockedTokenSymbol}`} font={{ size: '16px', color: colorText }} />);
+					claimStakedRow.appendChild(<i-label caption={`${formatNumber(new BigNumber(option.stakeQty).shiftedBy(defaultDecimalsOffset))} ${lockedTokenSymbol}`} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />);
 
-					const rowRewards = await VStack.create({ gap: 16, verticalAlignment: 'center' });
+					const rowRewards = await VStack.create({ gap: 8, verticalAlignment: 'center' });
 					if (isClaim) {
 						for (let idx = 0; idx < rewardsData.length; idx++) {
 							const reward = rewardsData[idx];
 							const rewardToken = this.getRewardToken(reward.rewardTokenAddress);
 							const rewardTokenDecimals = rewardToken.decimals || 18;
-							const decimalsOffset = 18 - rewardTokenDecimals;
+							let decimalsOffset = 18 - rewardTokenDecimals;
 							let rewardLockedDecimalsOffset = decimalsOffset;
 							if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
 								rewardLockedDecimalsOffset = decimalsOffset * 2;
+							} else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
+								rewardLockedDecimalsOffset = rewardTokenDecimals - lockedTokenDecimals;
+								decimalsOffset = 18 - lockedTokenDecimals;
 							}
 							const rewardSymbol = rewardToken.symbol || '';
 							rowRewards.appendChild(
 								<i-hstack horizontalAlignment="space-between">
 									<i-label caption={`${rewardSymbol} Locked`} font={{ size: '16px', color: colorText }} />
-									<i-label caption={`${formatNumber(new BigNumber(reward.vestedReward).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`} font={{ size: '16px', color: colorText }} />
+									<i-label caption={`${formatNumber(new BigNumber(reward.vestedReward).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
 								</i-hstack>
 							);
 							// rowRewards.appendChild(
@@ -738,7 +706,7 @@ export class StakingBlock extends Module implements PageBlock {
 							rowRewards.appendChild(
 								<i-hstack horizontalAlignment="space-between">
 									<i-label caption={`${rewardSymbol} Claimable`} font={{ size: '16px', color: colorText }} />
-									<i-label caption={rewardClaimable} font={{ size: '16px', color: colorText }} />
+									<i-label caption={rewardClaimable} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
 									{startClaimingText ? <i-label caption={startClaimingText} font={{ size: '16px', color: colorText }} /> : []}
 								</i-hstack>
 							);
@@ -774,27 +742,27 @@ export class StakingBlock extends Module implements PageBlock {
 					const rewardToken = this.getRewardToken(rewardsData[0].rewardTokenAddress);
 					const rewardIconPath = getTokenIconPath(rewardToken, chainId);
 					stakingElms[optionIdx].appendChild(
-						<i-vstack gap={16} width={720} class="column-custom" position="relative">
+						<i-vstack gap={16} width={700} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
 							{ stickerSections[optionIdx] }
 							<i-hstack gap={10} width="100%" verticalAlignment="center">
 								<i-hstack gap={10} width="50%">
-									<i-hstack width={pathsLength === 1 ? 73.5 : 90} position="relative" verticalAlignment="center">
-										<i-image width={70} height={70} url={Assets.fullPath(rewardIconPath)} fallbackUrl={fallBackUrl} />
+									<i-hstack width={pathsLength === 1 ? 63.5 : 80} position="relative" verticalAlignment="center">
+										<i-image width={60} height={60} url={Assets.fullPath(rewardIconPath)} fallbackUrl={fallBackUrl} />
 										{
 											_lockedTokenIconPaths.map((v: string, idxImg: number) => {
-												return <i-image position="absolute" width={30} height={30} bottom={0} left={(idxImg * 20) + 45} url={Assets.fullPath(v)} fallbackUrl={fallBackUrl} />
+												return <i-image position="absolute" width={28} height={28} bottom={0} left={(idxImg * 20) + 40} url={Assets.fullPath(v)} fallbackUrl={fallBackUrl} />
 											})
 										}
 									</i-hstack>
 									<i-vstack gap={2} verticalAlignment="center">
-										<i-label visible={!!campaign.customName} caption={campaign.customName} font={{ size: '20px', color: colorCampaignText, bold: true }} />
-										<i-label visible={!!campaign.customDesc} caption={campaign.customDesc} font={{ size: '16px', color: colorText }} class="opacity-50" />
+										<i-label visible={!!campaign.customName} caption={campaign.customName} font={{ size: '20px', name: 'Montserrat Bold', color: colorCampaignText, bold: true }} />
+										<i-label visible={!!campaign.customDesc} caption={campaign.customDesc} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} class="opacity-50" />
 									</i-vstack>
 								</i-hstack>
 								{
 									await Promise.all(rewardOptions.map(async (rewardOption: any, idx: number) => {
-										const lbApr = await Label.create({ font: { size: '20px', color: '#72F35D' }});
-										const lbRate = await Label.create({ font: { size: '16px', color: colorText }});
+										const lbApr = await Label.create({ font: { size: '20px', name: 'Montserrat Medium', color: '#72F35D' }});
+										const lbRate = await Label.create({ font: { size: '16px', name: 'Montserrat Regular', color: colorText }});
 										lbRate.classList.add('opacity-50');
 										const rewardToken = this.getRewardToken(rewardOption.rewardTokenAddress);
 										const rewardTokenDecimals = rewardToken.decimals || 18;
@@ -833,7 +801,7 @@ export class StakingBlock extends Module implements PageBlock {
 							<i-hstack width="100%" verticalAlignment="center">
 								<i-vstack gap={2} width="25%" verticalAlignment="center">
 									<i-label caption="Start Date" font={{ size: '14px', color: colorText }} class="opacity-50" />
-									<i-label caption={formatDate(option.startOfEntryPeriod, 'DD MMM, YYYY')} font={{ size: '16px', color: colorText }} />
+									<i-label caption={formatDate(option.startOfEntryPeriod, 'DD MMM, YYYY')} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
 								</i-vstack>
 								{ activeTimerRows[optionIdx] }
 								<i-vstack gap={2} width="25%" verticalAlignment="center">
@@ -846,7 +814,7 @@ export class StakingBlock extends Module implements PageBlock {
 													caption={durationDays < 1 ? '< 1 Day' : `${durationDays} Days`}
 													class={`btn-os ${isCurrentIdx ? 'cursor-default' : ''}`}
 													border={{ radius: 12, width: 1, style: 'solid', color: isCurrentIdx ? 'transparent' : '#8994A3' }}
-													font={{ size: '12px', color: isCurrentIdx ? colorText : '#8994A3' }}
+													font={{ size: '12px', name: 'Montserrat Regular', color: isCurrentIdx ? colorText : '#8994A3' }}
 													padding={{ top: 2.5, bottom: 2.5, left: 8, right: 8 }}
 													background={{ color: isCurrentIdx ? '#f15e61 !important' : 'transparent !important' }}
 													onClick={() => onChangeStake(_optionIdx)}
@@ -872,38 +840,39 @@ export class StakingBlock extends Module implements PageBlock {
 											<i-label caption="View Contract" font={{ size: '13.6px', color: colorText }} />
 										</i-hstack> : []
 									}
-									{
+									{/* {
 										campaign.showContractLink && isClaim ?
 										<i-hstack gap={4} class="pointer" width="fit-content" verticalAlignment="center" onClick={() => viewOnExplorerByAddress(chainId, rewardsData[0].address)}>
 											<i-icon name="external-link-alt" width={12} height={12} fill={colorText} class="inline-block" />
 											<i-label caption="View Reward Contract" font={{ size: '13.6px', color: colorText }} />
 										</i-hstack> : []
-									}
+									} */}
 								</i-vstack>
 							</i-hstack>
-							{ claimStakedRow }
-							{
-								await Promise.all(rewardOptions.map(async (rewardOption: any, idx: number) => {
-									const rewardToken = this.getRewardToken(rewardOption.rewardTokenAddress);
-									const rewardTokenDecimals = rewardToken.decimals || 18;
-									const decimalsOffset = 18 - rewardTokenDecimals;
-									let offset = decimalsOffset;
-									if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
-										offset = offset * 2;
-									}
-									const earnedQty = formatNumber(new BigNumber(option.totalCredit).times(new BigNumber(rewardOption.multiplier)).shiftedBy(offset));
-									const earnedSymbol = this.getRewardToken(rewardOption.rewardTokenAddress).symbol || '';
-									const rewardElm = await HStack.create({ verticalAlignment: 'center', horizontalAlignment: 'space-between' });
-									rewardElm.appendChild(<i-label caption="You Earned" font={{ size: '16px', color: colorText }} />);
-									rewardElm.appendChild(<i-label caption={`${earnedQty} ${earnedSymbol}`} font={{ size: '16px', color: colorText }} />);
-									return rewardElm;
-								}))
-							}
-							<i-vstack verticalAlignment="center" horizontalAlignment="center">
-								{ btnStake }
-								{ btnUnstake }
+							<i-vstack gap={8}>
+								{ claimStakedRow }
+								{/* {
+									await Promise.all(rewardOptions.map(async (rewardOption: any, idx: number) => {
+										const rewardToken = this.getRewardToken(rewardOption.rewardTokenAddress);
+										const rewardTokenDecimals = rewardToken.decimals || 18;
+										const decimalsOffset = 18 - rewardTokenDecimals;
+										let offset = decimalsOffset;
+										if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
+											offset = offset * 2;
+										}
+										const earnedQty = formatNumber(new BigNumber(option.totalCredit).times(new BigNumber(rewardOption.multiplier)).shiftedBy(offset));
+										const earnedSymbol = this.getRewardToken(rewardOption.rewardTokenAddress).symbol || '';
+										const rewardElm = await HStack.create({ verticalAlignment: 'center', horizontalAlignment: 'space-between' });
+										rewardElm.appendChild(<i-label caption="You Earned" font={{ size: '16px', color: colorText }} />);
+										rewardElm.appendChild(<i-label caption={`${earnedQty} ${earnedSymbol}`} font={{ size: '16px', color: colorText }} />);
+										return rewardElm;
+									}))
+								} */}
+								<i-vstack verticalAlignment="center" horizontalAlignment="center">
+									{ manageStake }
+								</i-vstack>
+								{ rowRewards }
 							</i-vstack>
-							{ rowRewards }
 						</i-vstack>
 					);
 					return stakingElms[optionIdx];
@@ -912,7 +881,7 @@ export class StakingBlock extends Module implements PageBlock {
 
 			nodeItems.push(containerSection);
 			containerSection.appendChild(
-				<i-hstack class="row-custom" background={{ color: colorCampaignBackground }} width="100%" maxWidth={720} height={405}>
+				<i-hstack background={{ color: colorCampaignBackground }} width="100%" maxWidth={700} height={321}>
 					{ stakingsElm }
 				</i-hstack>
 			)
@@ -924,7 +893,7 @@ export class StakingBlock extends Module implements PageBlock {
 	render() {
 		return (
 			<i-panel id="stakingComponent" class="staking-component" minHeight={200}>
-				<i-panel id="stakingLayout" class="staking-layout" width={720} height={405}>
+				<i-panel id="stakingLayout" class="staking-layout" width={700} height={321}>
 					<i-vstack id="loadingElm" class="i-loading-overlay">
 						<i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
 							<i-icon

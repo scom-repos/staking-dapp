@@ -149,8 +149,8 @@ export class StakingConfig extends Module {
 			if (this.tokenSelection) {
 				this.tokenSelection.enabled = this.isNew;
 			}
-			this.btnAdd.visible = this.isNew;
-			this.btnAdd.enabled = this.isNew;
+			this.btnAdd.visible = isMultiple && this.isNew;
+			this.btnAdd.enabled = isMultiple && this.isNew;
 		}
 	}
 
@@ -338,7 +338,7 @@ export class StakingConfig extends Module {
 		pnl.classList.add('pnl-label');
 		const icon = await Icon.create({ name: 'times', fill: '#181e3e', height: 12, width: 12, position: 'absolute', top: 1, right: 1 });
 		icon.onClick = () => this.removeReward(idx);
-		const button = await Button.create({ caption: `Reward ${idx + 1}`, padding: { top: 6, bottom: 6, left: 16, right: 16 } });
+		const button = await Button.create({ caption: `Reward ${ isMultiple ? idx + 1 : '' }`, padding: { top: 6, bottom: 6, left: 16, right: 16 } });
 		button.classList.add('btn-item');
 		if (!reward || !idx) {
 			button.classList.add('btn-active');
@@ -349,7 +349,8 @@ export class StakingConfig extends Module {
 			active.classList.remove('btn-active');
 		}
 		pnl.appendChild(button);
-		pnl.appendChild(icon);
+		if (isMultiple)
+			pnl.appendChild(icon);
 		this.listRewardButton.appendChild(pnl);
 		await this.addReward(idx, reward);
 		this.btnAdd.enabled = true;
@@ -509,9 +510,9 @@ export class StakingConfig extends Module {
 						</i-hstack>
 						<i-panel id="typeSelection" class="network-selection w-input" />
 					</i-hstack>
-					<i-hstack gap={10} visible={isMultiple} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
+					<i-hstack gap={10} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
 						<i-hstack id="listRewardButton" verticalAlignment="center" />
-						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Reward" onClick={() => this.onAddRewardByClick()} />
+						<i-button id="btnAdd" visible={isMultiple} class="btn-os" margin={{ left: 'auto' }} caption="Add Reward" onClick={() => this.onAddRewardByClick()} />
 					</i-hstack>
 					<i-panel width="100%" height={2} margin={{ bottom: 10 }} background={{ color: '#6573c3' }} />
 					<i-panel id="pnlInfoElm" />

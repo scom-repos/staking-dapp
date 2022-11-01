@@ -17,7 +17,7 @@ export default Styles.style({
       fill: '#F05E61'
     },
     '.i-modal_content': {
-      padding: '0 2.563rem 3rem'
+      padding: '0 2.563rem 1.5rem'
     },
     '.i-modal_header': {
       borderBottom: 'none !important'
@@ -34,7 +34,7 @@ export default Styles.style({
       textDecoration: 'none'
     },
     '.mb': {
-      marginBottom: '1.875rem'
+      marginBottom: '1rem'
     },
     'i-button': {
       padding: '1rem 2rem',

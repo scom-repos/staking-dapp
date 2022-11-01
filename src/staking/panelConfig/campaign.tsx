@@ -92,8 +92,8 @@ export class CampaignConfig extends Module {
 				this.inputCampaignEnd.classList.add('input-disabled');
 			}
 			this.inputAdmin.enabled = this.isNew;
-			this.btnAdd.visible = this.isNew;
-			this.btnAdd.enabled = this.isNew;
+			this.btnAdd.visible = isMultiple && this.isNew;
+			this.btnAdd.enabled = isMultiple && this.isNew;
 		}
 	}
 
@@ -326,7 +326,7 @@ export class CampaignConfig extends Module {
 		pnl.classList.add('pnl-label');
 		const icon = await Icon.create({ name: 'times', fill: '#181e3e', height: 12, width: 12, position: 'absolute', top: 1, right: 1 });
 		icon.onClick = () => this.removeStaking(idx);
-		const button = await Button.create({ caption: `Staking ${idx + 1}`, padding: { top: 6, bottom: 6, left: 16, right: 16 } });
+		const button = await Button.create({ caption: `Staking ${ isMultiple ? idx + 1 : '' }`, padding: { top: 6, bottom: 6, left: 16, right: 16 } });
 		button.classList.add('btn-item');
 		if (!staking || !idx) {
 			button.classList.add('btn-active');
@@ -337,7 +337,8 @@ export class CampaignConfig extends Module {
 			active.classList.remove('btn-active');
 		}
 		pnl.appendChild(button);
-		pnl.appendChild(icon);
+		if (isMultiple)
+			pnl.appendChild(icon);
 		this.listStakingButton.appendChild(pnl);
 		await this.addStaking(idx, staking);
 		this.btnAdd.enabled = true;
@@ -581,9 +582,9 @@ export class CampaignConfig extends Module {
 							<i-input id="inputStakingBtn" placeholder="linear-gradient(90deg, #AC1D78 0%, #E04862 100%)" class="input-text w-input" onChanged={this.onInputText} />
 						</i-hstack>
 					</i-vstack>
-					<i-hstack gap={10} visible={isMultiple} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
+					<i-hstack gap={10} margin={{ top: 10, bottom: 5 }} width="100%" verticalAlignment="center" horizontalAlignment="space-between" wrap="wrap-reverse">
 						<i-hstack id="listStakingButton" verticalAlignment="center" />
-						<i-button id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Staking" onClick={() => this.onAddStakingByClick()} />
+						<i-button visible={isMultiple} id="btnAdd" class="btn-os" margin={{ left: 'auto' }} caption="Add Staking" onClick={() => this.onAddStakingByClick()} />
 					</i-hstack>
 					<i-panel width="100%" height={2} margin={{ bottom: 10 }} background={{ color: '#6573C3' }} />
 					<i-panel id="pnlInfoElm" />
