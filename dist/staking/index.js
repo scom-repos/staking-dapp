@@ -5971,48 +5971,6 @@
     primaryDisabled: "transparent linear-gradient(270deg,#351f52,#552a42) 0% 0% no-repeat padding-box !important"
   };
   import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaBold.ttf")}") format("truetype")`,
-    fontWeight: "bold",
-    fontStyle: "normal"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaBoldIt.ttf")}") format("truetype")`,
-    fontWeight: "bold",
-    fontStyle: "italic"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaLight.ttf")}") format("truetype")`,
-    fontWeight: "300",
-    fontStyle: "normal"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaLightIt.ttf")}") format("truetype")`,
-    fontWeight: "300",
-    fontStyle: "italic"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaReg.ttf")}") format("truetype")`,
-    fontWeight: "normal",
-    fontStyle: "normal"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaRegIt.ttf")}") format("truetype")`,
-    fontWeight: "normal",
-    fontStyle: "italic"
-  });
-  import_components3.Styles.fontFace({
-    fontFamily: "Proxima Nova",
-    src: `url("${import_assets2.default.fullPath("fonts/proxima_nova/ProximaNovaBold.ttf")}") format("truetype")`,
-    fontWeight: "bold",
-    fontStyle: "normal"
-  });
-  import_components3.Styles.fontFace({
     fontFamily: "Apple SD Gothic Neo",
     src: `url("${import_assets2.default.fullPath("fonts/FontsFree-Net-Apple-SD-Gothic-Neo-Bold.ttf")}") format("truetype")`,
     fontWeight: "bold",

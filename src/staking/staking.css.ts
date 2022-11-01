@@ -9,55 +9,6 @@ const colorVar = {
 }
 
 Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaBold.ttf')}") format("truetype")`,
-  fontWeight: 'bold',
-  fontStyle: 'normal'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaBoldIt.ttf')}") format("truetype")`,
-  fontWeight: 'bold',
-  fontStyle: 'italic'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaLight.ttf')}") format("truetype")`,
-  fontWeight: '300',
-  fontStyle: 'normal'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaLightIt.ttf')}") format("truetype")`,
-  fontWeight: '300',
-  fontStyle: 'italic'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaReg.ttf')}") format("truetype")`,
-  fontWeight: 'normal',
-  fontStyle: 'normal'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaRegIt.ttf')}") format("truetype")`,
-  fontWeight: 'normal',
-  fontStyle: 'italic'
-})
-
-Styles.fontFace({
-  fontFamily: "Proxima Nova",
-  src: `url("${Assets.fullPath('fonts/proxima_nova/ProximaNovaBold.ttf')}") format("truetype")`,
-  fontWeight: 'bold',
-  fontStyle: 'normal'
-})
-
-Styles.fontFace({
   fontFamily: "Apple SD Gothic Neo",
   src: `url("${Assets.fullPath('fonts/FontsFree-Net-Apple-SD-Gothic-Neo-Bold.ttf')}") format("truetype")`,
   fontWeight: 'bold',
