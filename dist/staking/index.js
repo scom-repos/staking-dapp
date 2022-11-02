@@ -10753,9 +10753,6 @@
           const endHours = [];
           const endDays = [];
           const endMins = [];
-          const stickerSections = [];
-          const stickerLabels = [];
-          const stickerIcons = [];
           for (let i = 0; i < options.length; i++) {
             stakingElms[i] = await import_components14.VStack.create({ visible: i === 0 });
             activeTimerRows[i] = await import_components14.VStack.create({ gap: 2, width: "25%", verticalAlignment: "center" });
@@ -10788,13 +10785,6 @@
               class: "timer-unit",
               font: { color: colorText }
             })));
-            stickerSections[i] = await import_components14.Panel.create({ visible: false });
-            stickerLabels[i] = await import_components14.Label.create();
-            stickerIcons[i] = await import_components14.Icon.create();
-            stickerSections[i].classList.add("sticker");
-            stickerSections[i].appendChild(/* @__PURE__ */ this.$render("i-vstack", {
-              class: "sticker-text"
-            }, stickerIcons[i], stickerLabels[i]));
           }
           const onChangeStake = (index) => {
             stakingElms.forEach((elm) => {
@@ -10805,7 +10795,6 @@
           const setAvailableQty = async () => {
             if (!(0, import_store10.isWalletConnected)())
               return;
-            let i = 0;
             for (const o of options) {
               const _totalLocked = await (0, import_staking_utils3.getStakingTotalLocked)(o.address);
               totalLocked[o.address] = _totalLocked;
@@ -10832,29 +10821,6 @@
                   btnUnstake.enabled = !isUnstaking && o.mode !== "Stake" && Number(o.stakeQty) != 0;
                 }
               }
-              if (isClosed) {
-                if (stickerLabels[i].caption !== "Closed") {
-                  stickerSections[i].classList.add("closed");
-                  stickerSections[i].classList.remove("sold-out");
-                  stickerLabels[i].caption = "Closed";
-                  stickerIcons[i].name = "check-square";
-                }
-              } else if (optionQty.lte(0)) {
-                if (stickerLabels[i].caption !== "Sold Out") {
-                  stickerLabels[i].caption = "Sold Out";
-                  stickerIcons[i].name = "star";
-                  stickerSections[i].classList.add("sold-out");
-                }
-              } else {
-                if (stickerLabels[i].caption !== "Active") {
-                  stickerLabels[i].caption = "Active";
-                  stickerIcons[i].name = "star";
-                }
-              }
-              if (!stickerSections[i].visible) {
-                stickerSections[i].visible = true;
-              }
-              i++;
             }
             ;
           };
@@ -10991,7 +10957,7 @@
               height: "100%",
               padding: { top: 10, bottom: 10, left: 20, right: 20 },
               position: "relative"
-            }, stickerSections[optionIdx], /* @__PURE__ */ this.$render("i-hstack", {
+            }, /* @__PURE__ */ this.$render("i-hstack", {
               gap: 10,
               width: "100%",
               verticalAlignment: "center"

@@ -507,9 +507,9 @@ export class StakingBlock extends Module implements PageBlock {
 			const endHours: Label[] = [];
 			const endDays: Label[] = [];
 			const endMins: Label[] = [];
-			const stickerSections: Panel[] = [];
-			const stickerLabels: Label[] = [];
-			const stickerIcons: Icon[] = [];
+			// const stickerSections: Panel[] = [];
+			// const stickerLabels: Label[] = [];
+			// const stickerIcons: Icon[] = [];
 			for (let i = 0; i < options.length; i++) {
 				stakingElms[i] = await VStack.create({ visible: i === 0 });
 				activeTimerRows[i] = await VStack.create({ gap: 2, width: '25%', verticalAlignment: 'center' });
@@ -534,16 +534,16 @@ export class StakingBlock extends Module implements PageBlock {
 				);
 
 				// Sticker
-				stickerSections[i] = await Panel.create({ visible: false });
-				stickerLabels[i] = await Label.create();
-				stickerIcons[i] = await Icon.create();
-				stickerSections[i].classList.add('sticker');
-				stickerSections[i].appendChild(
-					<i-vstack class="sticker-text">
-						{stickerIcons[i]}
-						{stickerLabels[i]}
-					</i-vstack>
-				);
+				// stickerSections[i] = await Panel.create({ visible: false });
+				// stickerLabels[i] = await Label.create();
+				// stickerIcons[i] = await Icon.create();
+				// stickerSections[i].classList.add('sticker');
+				// stickerSections[i].appendChild(
+				// 	<i-vstack class="sticker-text">
+				// 		{stickerIcons[i]}
+				// 		{stickerLabels[i]}
+				// 	</i-vstack>
+				// );
 			}
 
 			const onChangeStake = (index: number) => {
@@ -555,7 +555,7 @@ export class StakingBlock extends Module implements PageBlock {
 
 			const setAvailableQty = async () => {
 				if (!isWalletConnected()) return;
-				let i = 0;
+				// let i = 0;
 				for (const o of options) {
 					const _totalLocked = await getStakingTotalLocked(o.address);
 					totalLocked[o.address] = _totalLocked;
@@ -582,29 +582,29 @@ export class StakingBlock extends Module implements PageBlock {
 							btnUnstake.enabled = !isUnstaking && o.mode !== 'Stake' && Number(o.stakeQty) != 0;
 						}
 					}
-					if (isClosed) {
-						if (stickerLabels[i].caption !== 'Closed') {
-							stickerSections[i].classList.add('closed');
-							stickerSections[i].classList.remove('sold-out');
-							stickerLabels[i].caption = 'Closed';
-							stickerIcons[i].name = 'check-square';
-						}
-					} else if (optionQty.lte(0)) {
-						if (stickerLabels[i].caption !== 'Sold Out') {
-							stickerLabels[i].caption = 'Sold Out';
-							stickerIcons[i].name = 'star';
-							stickerSections[i].classList.add('sold-out');
-						}
-					} else {
-						if (stickerLabels[i].caption !== 'Active') {
-							stickerLabels[i].caption = 'Active';
-							stickerIcons[i].name = 'star';
-						}
-					}
-					if (!stickerSections[i].visible) {
-						stickerSections[i].visible = true;
-					}
-					i++;
+					// if (isClosed) {
+					// 	if (stickerLabels[i].caption !== 'Closed') {
+					// 		stickerSections[i].classList.add('closed');
+					// 		stickerSections[i].classList.remove('sold-out');
+					// 		stickerLabels[i].caption = 'Closed';
+					// 		stickerIcons[i].name = 'check-square';
+					// 	}
+					// } else if (optionQty.lte(0)) {
+					// 	if (stickerLabels[i].caption !== 'Sold Out') {
+					// 		stickerLabels[i].caption = 'Sold Out';
+					// 		stickerIcons[i].name = 'star';
+					// 		stickerSections[i].classList.add('sold-out');
+					// 	}
+					// } else {
+					// 	if (stickerLabels[i].caption !== 'Active') {
+					// 		stickerLabels[i].caption = 'Active';
+					// 		stickerIcons[i].name = 'star';
+					// 	}
+					// }
+					// if (!stickerSections[i].visible) {
+					// 	stickerSections[i].visible = true;
+					// }
+					// i++;
 				};
 			}
 
@@ -743,7 +743,7 @@ export class StakingBlock extends Module implements PageBlock {
 					const rewardIconPath = getTokenIconPath(rewardToken, chainId);
 					stakingElms[optionIdx].appendChild(
 						<i-vstack gap={16} width={700} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
-							{ stickerSections[optionIdx] }
+							{/* { stickerSections[optionIdx] } */}
 							<i-hstack gap={10} width="100%" verticalAlignment="center">
 								<i-hstack gap={10} width="50%">
 									<i-hstack width={pathsLength === 1 ? 63.5 : 80} position="relative" verticalAlignment="center">
