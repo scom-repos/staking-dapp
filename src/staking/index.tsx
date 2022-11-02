@@ -757,7 +757,7 @@ export class StakingBlock extends Module implements PageBlock {
 								</i-hstack>
 								{
 									await Promise.all(rewardOptions.map(async (rewardOption: any, idx: number) => {
-										const lbApr = await Label.create({ font: { size: '20px', name: 'Montserrat Medium', color: '#72F35D' }});
+										const lbApr = await Label.create({ font: { size: '36px', name: 'Montserrat Medium', color: '#72F35D' }});
 										const lbRate = await Label.create({ font: { size: '16px', name: 'Montserrat Regular', color: colorText }});
 										lbRate.classList.add('opacity-50');
 										const rewardToken = this.getRewardToken(rewardOption.rewardTokenAddress);

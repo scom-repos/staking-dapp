@@ -11030,7 +11030,7 @@
               font: { size: "16px", name: "Montserrat Regular", color: colorText },
               class: "opacity-50"
             }))), await Promise.all(rewardOptions.map(async (rewardOption, idx2) => {
-              const lbApr = await import_components14.Label.create({ font: { size: "20px", name: "Montserrat Medium", color: "#72F35D" } });
+              const lbApr = await import_components14.Label.create({ font: { size: "36px", name: "Montserrat Medium", color: "#72F35D" } });
               const lbRate = await import_components14.Label.create({ font: { size: "16px", name: "Montserrat Regular", color: colorText } });
               lbRate.classList.add("opacity-50");
               const rewardToken2 = this.getRewardToken(rewardOption.rewardTokenAddress);
