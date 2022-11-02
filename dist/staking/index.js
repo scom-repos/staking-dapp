@@ -6140,6 +6140,11 @@
       ".cursor-default": {
         cursor: "default"
       },
+      ".text-overflow": {
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      },
       ".wrapper": {
         width: "100%",
         height: "100%",
@@ -6370,6 +6375,9 @@
       };
       this.getBalance = () => {
         return this.balance;
+      };
+      this.needToBeApproval = () => {
+        return this.btnApprove && this.btnApprove.visible;
       };
       this.showResultMessage = (result, status, content) => {
         if (!result)
@@ -10824,7 +10832,7 @@
                   if (inputElm) {
                     const manageStake = this.querySelector(`#manage-stake-${o.address}`);
                     const inputVal = new import_eth_wallet7.BigNumber(inputElm.value || 0);
-                    isValidInput = inputVal.gt(0) && inputVal.lte(manageStake.getBalance());
+                    isValidInput = inputVal.gt(0) && inputVal.lte(manageStake.getBalance()) && !(manageStake == null ? void 0 : manageStake.needToBeApproval());
                   }
                   btnStake.enabled = !isStaking && isValidInput && (isStarted && !(optionQty.lte(0) || isClosed));
                 }
@@ -10833,7 +10841,8 @@
                 const btnUnstake = this.querySelector(keyUnstake);
                 const isUnstaking = (0, import_store10.getStakingStatus)(keyUnstake).value;
                 if (btnUnstake) {
-                  btnUnstake.enabled = !isUnstaking && o.mode !== "Stake" && Number(o.stakeQty) != 0;
+                  const manageStake = this.querySelector(`#manage-stake-${o.address}`);
+                  btnUnstake.enabled = !isUnstaking && o.mode !== "Stake" && Number(o.stakeQty) != 0 && !(manageStake == null ? void 0 : manageStake.needToBeApproval());
                 }
               }
               if (isClosed) {
@@ -11013,25 +11022,28 @@
                 width: 28,
                 height: 28,
                 bottom: 0,
-                left: idxImg * 20 + 40,
+                left: idxImg * 20 + 35,
                 url: import_assets4.default.fullPath(v),
                 fallbackUrl: import_store10.fallBackUrl
               });
             })), /* @__PURE__ */ this.$render("i-vstack", {
               gap: 2,
+              overflow: { x: "hidden" },
               verticalAlignment: "center"
             }, /* @__PURE__ */ this.$render("i-label", {
               visible: !!campaign.customName,
               caption: campaign.customName,
-              font: { size: "20px", name: "Montserrat Bold", color: colorCampaignText, bold: true }
+              font: { size: "20px", name: "Montserrat Bold", color: colorCampaignText, bold: true },
+              class: "text-overflow"
             }), /* @__PURE__ */ this.$render("i-label", {
               visible: !!campaign.customDesc,
               caption: campaign.customDesc,
               font: { size: "16px", name: "Montserrat Regular", color: colorText },
-              class: "opacity-50"
+              class: "opacity-50 text-overflow"
             }))), await Promise.all(rewardOptions.map(async (rewardOption, idx2) => {
               const lbApr = await import_components14.Label.create({ font: { size: "40px", name: "Montserrat Medium", color: "#72F35D" } });
               const lbRate = await import_components14.Label.create({ font: { size: "16px", name: "Montserrat Regular", color: colorText } });
+              lbApr.classList.add("text-overflow");
               lbRate.classList.add("opacity-50");
               const rewardToken2 = this.getRewardToken(rewardOption.rewardTokenAddress);
               const rewardTokenDecimals = rewardToken2.decimals || 18;

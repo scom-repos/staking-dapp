@@ -73,6 +73,10 @@ export class ManageStake extends Module {
     return this.balance;
   }
 
+  needToBeApproval = () => {
+    return this.btnApprove && this.btnApprove.visible;
+  }
+
   get actionKey() {
     if (this.currentMode === CurrentMode.STAKE) {
       return `#btn-stake-${this.address}`;

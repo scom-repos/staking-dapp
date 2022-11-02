@@ -570,7 +570,7 @@ export class StakingBlock extends Module implements PageBlock {
 							if (inputElm) {
 								const manageStake = this.querySelector(`#manage-stake-${o.address}`) as ManageStake;
 								const inputVal = new BigNumber(inputElm.value || 0);
-								isValidInput = inputVal.gt(0) && inputVal.lte(manageStake.getBalance());
+								isValidInput = inputVal.gt(0) && inputVal.lte(manageStake.getBalance()) && !manageStake?.needToBeApproval();
 							}
 							btnStake.enabled = !isStaking && isValidInput && (isStarted && !(optionQty.lte(0) || isClosed));
 						}
@@ -579,7 +579,8 @@ export class StakingBlock extends Module implements PageBlock {
 						const btnUnstake = this.querySelector(keyUnstake) as Button;
 						const isUnstaking = getStakingStatus(keyUnstake).value;
 						if (btnUnstake) {
-							btnUnstake.enabled = !isUnstaking && o.mode !== 'Stake' && Number(o.stakeQty) != 0;
+							const manageStake = this.querySelector(`#manage-stake-${o.address}`) as ManageStake;
+							btnUnstake.enabled = !isUnstaking && o.mode !== 'Stake' && Number(o.stakeQty) != 0 && !manageStake?.needToBeApproval();
 						}
 					}
 					if (isClosed) {
@@ -746,19 +747,20 @@ export class StakingBlock extends Module implements PageBlock {
 										<i-image width={60} height={60} url={Assets.fullPath(rewardIconPath)} fallbackUrl={fallBackUrl} />
 										{
 											_lockedTokenIconPaths.map((v: string, idxImg: number) => {
-												return <i-image position="absolute" width={28} height={28} bottom={0} left={(idxImg * 20) + 40} url={Assets.fullPath(v)} fallbackUrl={fallBackUrl} />
+												return <i-image position="absolute" width={28} height={28} bottom={0} left={(idxImg * 20) + 35} url={Assets.fullPath(v)} fallbackUrl={fallBackUrl} />
 											})
 										}
 									</i-hstack>
-									<i-vstack gap={2} verticalAlignment="center">
-										<i-label visible={!!campaign.customName} caption={campaign.customName} font={{ size: '20px', name: 'Montserrat Bold', color: colorCampaignText, bold: true }} />
-										<i-label visible={!!campaign.customDesc} caption={campaign.customDesc} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} class="opacity-50" />
+									<i-vstack gap={2} overflow={{ x: 'hidden' }} verticalAlignment="center">
+										<i-label visible={!!campaign.customName} caption={campaign.customName} font={{ size: '20px', name: 'Montserrat Bold', color: colorCampaignText, bold: true }} class="text-overflow" />
+										<i-label visible={!!campaign.customDesc} caption={campaign.customDesc} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} class="opacity-50 text-overflow" />
 									</i-vstack>
 								</i-hstack>
 								{
 									await Promise.all(rewardOptions.map(async (rewardOption: any, idx: number) => {
 										const lbApr = await Label.create({ font: { size: '40px', name: 'Montserrat Medium', color: '#72F35D' }});
 										const lbRate = await Label.create({ font: { size: '16px', name: 'Montserrat Regular', color: colorText }});
+										lbApr.classList.add('text-overflow');
 										lbRate.classList.add('opacity-50');
 										const rewardToken = this.getRewardToken(rewardOption.rewardTokenAddress);
 										const rewardTokenDecimals = rewardToken.decimals || 18;
@@ -855,6 +857,8 @@ export class StakingBlock extends Module implements PageBlock {
 										let offset = decimalsOffset;
 										if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
 											offset = offset * 2;
+										} else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
+											offset = 18 - lockedTokenDecimals;
 										}
 										const earnedQty = formatNumber(new BigNumber(option.totalCredit).times(new BigNumber(rewardOption.multiplier)).shiftedBy(offset));
 										const earnedSymbol = this.getRewardToken(rewardOption.rewardTokenAddress).symbol || '';

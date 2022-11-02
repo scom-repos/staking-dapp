@@ -188,6 +188,11 @@ Styles.cssRule('.staking-component', {
     '.cursor-default': {
       cursor: 'default',
     },
+    '.text-overflow': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
     '.wrapper': {
       width: '100%',
       height: '100%',
