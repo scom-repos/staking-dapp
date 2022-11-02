@@ -5960,6 +5960,8 @@
   var getTokenUrl = `${baseUrl}/swap`;
   var isThemeApplied = false;
   var isMultiple = false;
+  var maxWidth = "690px";
+  var maxHeight = "321px";
 
   // src/staking/staking.css.ts
   var import_components3 = __toModule(__require("@ijstech/components"));
@@ -6141,8 +6143,8 @@
       ".wrapper": {
         width: "100%",
         height: "100%",
-        maxWidth: 700,
-        maxHeight: 321,
+        maxWidth,
+        maxHeight,
         $nest: {
           ".sticker": {
             position: "absolute",
@@ -6395,6 +6397,8 @@
       };
       this.onInputAmount = () => {
         var _a;
+        if (!this.inputAmount.enabled)
+          return;
         this.currentMode = 0;
         (0, import_global2.limitInputNumber)(this.inputAmount, ((_a = this.lockedTokenObject) == null ? void 0 : _a.decimals) || 18);
         this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.inputAmount.value);
@@ -10910,68 +10914,64 @@
               font: { size: "16px", name: "Montserrat Regular", color: colorText }
             }));
             const rowRewards = await import_components14.VStack.create({ gap: 8, verticalAlignment: "center" });
-            if (isClaim) {
-              for (let idx2 = 0; idx2 < rewardsData.length; idx2++) {
-                const reward = rewardsData[idx2];
-                const rewardToken2 = this.getRewardToken(reward.rewardTokenAddress);
-                const rewardTokenDecimals = rewardToken2.decimals || 18;
-                let decimalsOffset = 18 - rewardTokenDecimals;
-                let rewardLockedDecimalsOffset = decimalsOffset;
-                if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
-                  rewardLockedDecimalsOffset = decimalsOffset * 2;
-                } else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
-                  rewardLockedDecimalsOffset = rewardTokenDecimals - lockedTokenDecimals;
-                  decimalsOffset = 18 - lockedTokenDecimals;
-                }
-                const rewardSymbol = rewardToken2.symbol || "";
-                rowRewards.appendChild(/* @__PURE__ */ this.$render("i-hstack", {
-                  horizontalAlignment: "space-between"
-                }, /* @__PURE__ */ this.$render("i-label", {
-                  caption: `${rewardSymbol} Locked`,
-                  font: { size: "16px", color: colorText }
-                }), /* @__PURE__ */ this.$render("i-label", {
-                  caption: `${(0, import_global9.formatNumber)(new import_eth_wallet7.BigNumber(reward.vestedReward).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`,
-                  font: { size: "16px", name: "Montserrat Regular", color: colorText }
-                })));
-                const passClaimStartTime = !(reward.claimStartTime && (0, import_moment4.default)().diff(import_moment4.default.unix(reward.claimStartTime)) < 0);
-                let rewardClaimable = `0 ${rewardSymbol}`;
-                if (passClaimStartTime) {
-                  rewardClaimable = `${(0, import_global9.formatNumber)(new import_eth_wallet7.BigNumber(reward.claimable).shiftedBy(decimalsOffset))} ${rewardSymbol}`;
-                }
-                let startClaimingText = "";
-                if (!(!reward.claimStartTime || passClaimStartTime)) {
-                  const claimStart = import_moment4.default.unix(reward.claimStartTime).format("YYYY-MM-DD HH:mm:ss");
-                  startClaimingText = `(Claim ${rewardSymbol} after ${claimStart})`;
-                }
-                rowRewards.appendChild(/* @__PURE__ */ this.$render("i-hstack", {
-                  horizontalAlignment: "space-between"
-                }, /* @__PURE__ */ this.$render("i-label", {
-                  caption: `${rewardSymbol} Claimable`,
-                  font: { size: "16px", color: colorText }
-                }), /* @__PURE__ */ this.$render("i-label", {
-                  caption: rewardClaimable,
-                  font: { size: "16px", name: "Montserrat Regular", color: colorText }
-                }), startClaimingText ? /* @__PURE__ */ this.$render("i-label", {
-                  caption: startClaimingText,
-                  font: { size: "16px", color: colorText }
-                }) : []));
-                const btnClaim = await import_components14.Button.create({
-                  rightIcon: { spin: true, fill: colorText, visible: false },
-                  caption: `Claim ${rewardSymbol}`,
-                  background: { color: `${colorButton} !important` },
-                  font: { color: colorText },
-                  enabled: !(!passClaimStartTime || new import_eth_wallet7.BigNumber(reward.claimable).isZero()),
-                  margin: { left: "auto", right: "auto" }
-                });
-                btnClaim.id = `btnClaim-${idx2}-${option.address}`;
-                btnClaim.classList.add("btn-os", "btn-stake");
-                btnClaim.onClick = () => this.onClaim(btnClaim, { reward, rewardSymbol });
-                rowRewards.appendChild(btnClaim);
+            for (let idx2 = 0; idx2 < rewardsData.length; idx2++) {
+              const reward = rewardsData[idx2];
+              const rewardToken2 = this.getRewardToken(reward.rewardTokenAddress);
+              const rewardTokenDecimals = rewardToken2.decimals || 18;
+              let decimalsOffset = 18 - rewardTokenDecimals;
+              let rewardLockedDecimalsOffset = decimalsOffset;
+              if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
+                rewardLockedDecimalsOffset = decimalsOffset * 2;
+              } else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
+                rewardLockedDecimalsOffset = rewardTokenDecimals - lockedTokenDecimals;
+                decimalsOffset = 18 - lockedTokenDecimals;
               }
-              ;
-            } else {
-              rowRewards.visible = false;
+              const rewardSymbol = rewardToken2.symbol || "";
+              rowRewards.appendChild(/* @__PURE__ */ this.$render("i-hstack", {
+                horizontalAlignment: "space-between"
+              }, /* @__PURE__ */ this.$render("i-label", {
+                caption: `${rewardSymbol} Locked`,
+                font: { size: "16px", color: colorText }
+              }), /* @__PURE__ */ this.$render("i-label", {
+                caption: `${(0, import_global9.formatNumber)(new import_eth_wallet7.BigNumber(reward.vestedReward || 0).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`,
+                font: { size: "16px", name: "Montserrat Regular", color: colorText }
+              })));
+              const passClaimStartTime = !(reward.claimStartTime && (0, import_moment4.default)().diff(import_moment4.default.unix(reward.claimStartTime)) < 0);
+              let rewardClaimable = `0 ${rewardSymbol}`;
+              if (passClaimStartTime && isClaim) {
+                rewardClaimable = `${(0, import_global9.formatNumber)(new import_eth_wallet7.BigNumber(reward.claimable).shiftedBy(decimalsOffset))} ${rewardSymbol}`;
+              }
+              let startClaimingText = "";
+              if (!(!reward.claimStartTime || passClaimStartTime) && isClaim) {
+                const claimStart = import_moment4.default.unix(reward.claimStartTime).format("YYYY-MM-DD HH:mm:ss");
+                startClaimingText = `(Claim ${rewardSymbol} after ${claimStart})`;
+              }
+              rowRewards.appendChild(/* @__PURE__ */ this.$render("i-hstack", {
+                horizontalAlignment: "space-between"
+              }, /* @__PURE__ */ this.$render("i-label", {
+                caption: `${rewardSymbol} Claimable`,
+                font: { size: "16px", color: colorText }
+              }), /* @__PURE__ */ this.$render("i-label", {
+                caption: rewardClaimable,
+                font: { size: "16px", name: "Montserrat Regular", color: colorText }
+              }), startClaimingText ? /* @__PURE__ */ this.$render("i-label", {
+                caption: startClaimingText,
+                font: { size: "16px", color: colorText }
+              }) : []));
+              const btnClaim = await import_components14.Button.create({
+                rightIcon: { spin: true, fill: colorText, visible: false },
+                caption: `Claim ${rewardSymbol}`,
+                background: { color: `${colorButton} !important` },
+                font: { color: colorText },
+                enabled: !(!passClaimStartTime || new import_eth_wallet7.BigNumber(reward.claimable).isZero()) && isClaim,
+                margin: { left: "auto", right: "auto" }
+              });
+              btnClaim.id = `btnClaim-${idx2}-${option.address}`;
+              btnClaim.classList.add("btn-os", "btn-stake");
+              btnClaim.onClick = () => this.onClaim(btnClaim, { reward, rewardSymbol });
+              rowRewards.appendChild(btnClaim);
             }
+            ;
             const getAprValue = (rewardOption) => {
               if (rewardOption && aprInfo && aprInfo[rewardOption.rewardTokenAddress]) {
                 const apr = new import_eth_wallet7.BigNumber(aprInfo[rewardOption.rewardTokenAddress]).times(100).toFormat(2, import_eth_wallet7.BigNumber.ROUND_DOWN);
@@ -10987,7 +10987,7 @@
             const rewardIconPath = (0, import_store10.getTokenIconPath)(rewardToken, chainId);
             stakingElms[optionIdx].appendChild(/* @__PURE__ */ this.$render("i-vstack", {
               gap: 16,
-              width: 700,
+              width: maxWidth,
               height: "100%",
               padding: { top: 10, bottom: 10, left: 20, right: 20 },
               position: "relative"
@@ -11156,8 +11156,8 @@
           containerSection.appendChild(/* @__PURE__ */ this.$render("i-hstack", {
             background: { color: colorCampaignBackground },
             width: "100%",
-            maxWidth: 700,
-            height: 321
+            maxWidth,
+            height: maxHeight
           }, stakingsElm));
         }
         ;
@@ -11239,8 +11239,8 @@
       }, /* @__PURE__ */ this.$render("i-panel", {
         id: "stakingLayout",
         class: "staking-layout",
-        width: 700,
-        height: 321
+        width: maxWidth,
+        height: maxHeight
       }, /* @__PURE__ */ this.$render("i-vstack", {
         id: "loadingElm",
         class: "i-loading-overlay"

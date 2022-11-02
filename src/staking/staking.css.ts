@@ -1,5 +1,6 @@
 import { Styles } from '@ijstech/components';
 import Assets from '@staking/assets';
+import { maxWidth, maxHeight } from '../config';
 
 const colorVar = {
   primaryButton: 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box',
@@ -190,8 +191,8 @@ Styles.cssRule('.staking-component', {
     '.wrapper': {
       width: '100%',
       height: '100%',
-      maxWidth: 700,
-      maxHeight: 321,
+      maxWidth,
+      maxHeight,
       $nest: {
         '.sticker': {
           position: 'absolute',

@@ -21,7 +21,7 @@ import Assets from '@staking/assets';
 import moment from 'moment';
 import { BigNumber, Wallet, WalletPlugin } from '@ijstech/eth-wallet';
 import { Result } from '../result';
-import { getTokenUrl, isThemeApplied } from '../config';
+import { getTokenUrl, isThemeApplied, maxHeight, maxWidth } from '../config';
 import './staking.css';
 import { ManageStake } from './manageStake';
 import { PanelConfig } from './panelConfig';
@@ -661,71 +661,67 @@ export class StakingBlock extends Module implements PageBlock {
 					claimStakedRow.appendChild(<i-label caption={`${formatNumber(new BigNumber(option.stakeQty).shiftedBy(defaultDecimalsOffset))} ${lockedTokenSymbol}`} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />);
 
 					const rowRewards = await VStack.create({ gap: 8, verticalAlignment: 'center' });
-					if (isClaim) {
-						for (let idx = 0; idx < rewardsData.length; idx++) {
-							const reward = rewardsData[idx];
-							const rewardToken = this.getRewardToken(reward.rewardTokenAddress);
-							const rewardTokenDecimals = rewardToken.decimals || 18;
-							let decimalsOffset = 18 - rewardTokenDecimals;
-							let rewardLockedDecimalsOffset = decimalsOffset;
-							if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
-								rewardLockedDecimalsOffset = decimalsOffset * 2;
-							} else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
-								rewardLockedDecimalsOffset = rewardTokenDecimals - lockedTokenDecimals;
-								decimalsOffset = 18 - lockedTokenDecimals;
-							}
-							const rewardSymbol = rewardToken.symbol || '';
-							rowRewards.appendChild(
-								<i-hstack horizontalAlignment="space-between">
-									<i-label caption={`${rewardSymbol} Locked`} font={{ size: '16px', color: colorText }} />
-									<i-label caption={`${formatNumber(new BigNumber(reward.vestedReward).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
-								</i-hstack>
-							);
-							// rowRewards.appendChild(
-							// 	<i-hstack horizontalAlignment="space-between">
-							// 		<i-label caption={`${rewardSymbol} Vesting Start`} font={{ size: '16px', color: colorText }} />
-							// 		<i-label caption={reward.vestingStart ? reward.vestingStart.format('YYYY-MM-DD HH:mm:ss') : 'TBC'} font={{ size: '16px', color: colorText }} />
-							// 	</i-hstack>
-							// );
-							// rowRewards.appendChild(
-							// 	<i-hstack horizontalAlignment="space-between">
-							// 		<i-label caption={`${rewardSymbol} Vesting End`} font={{ size: '16px', color: colorText }} />
-							// 		<i-label caption={reward.vestingEnd ? reward.vestingEnd.format('YYYY-MM-DD HH:mm:ss') : 'TBC'} font={{ size: '16px', color: colorText }} />
-							// 	</i-hstack>
-							// );
-							const passClaimStartTime = !(reward.claimStartTime && moment().diff(moment.unix(reward.claimStartTime)) < 0);
-							let rewardClaimable = `0 ${rewardSymbol}`;
-							if (passClaimStartTime) {
-								rewardClaimable = `${formatNumber(new BigNumber(reward.claimable).shiftedBy(decimalsOffset))} ${rewardSymbol}`;
-							}
-							let startClaimingText = '';
-							if (!(!reward.claimStartTime || passClaimStartTime)) {
-								const claimStart = moment.unix(reward.claimStartTime).format('YYYY-MM-DD HH:mm:ss');
-								startClaimingText = `(Claim ${rewardSymbol} after ${claimStart})`;
-							}
-							rowRewards.appendChild(
-								<i-hstack horizontalAlignment="space-between">
-									<i-label caption={`${rewardSymbol} Claimable`} font={{ size: '16px', color: colorText }} />
-									<i-label caption={rewardClaimable} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
-									{startClaimingText ? <i-label caption={startClaimingText} font={{ size: '16px', color: colorText }} /> : []}
-								</i-hstack>
-							);
-							const btnClaim = await Button.create({
-								rightIcon: { spin: true, fill: colorText, visible: false },
-								caption: `Claim ${rewardSymbol}`,
-								background: { color: `${colorButton} !important` },
-								font: { color: colorText },
-								enabled: !(!passClaimStartTime || new BigNumber(reward.claimable).isZero()),
-								margin: { left: 'auto', right: 'auto' }
-							})
-							btnClaim.id = `btnClaim-${idx}-${option.address}`;
-							btnClaim.classList.add('btn-os', 'btn-stake');
-							btnClaim.onClick = () => this.onClaim(btnClaim, { reward, rewardSymbol });
-							rowRewards.appendChild(btnClaim);
-						};
-					} else {
-						rowRewards.visible = false;
-					}
+					for (let idx = 0; idx < rewardsData.length; idx++) {
+						const reward = rewardsData[idx];
+						const rewardToken = this.getRewardToken(reward.rewardTokenAddress);
+						const rewardTokenDecimals = rewardToken.decimals || 18;
+						let decimalsOffset = 18 - rewardTokenDecimals;
+						let rewardLockedDecimalsOffset = decimalsOffset;
+						if (rewardTokenDecimals !== 18 && lockedTokenDecimals !== 18) {
+							rewardLockedDecimalsOffset = decimalsOffset * 2;
+						} else if (lockedTokenDecimals !== 18 && rewardTokenDecimals === 18) {
+							rewardLockedDecimalsOffset = rewardTokenDecimals - lockedTokenDecimals;
+							decimalsOffset = 18 - lockedTokenDecimals;
+						}
+						const rewardSymbol = rewardToken.symbol || '';
+						rowRewards.appendChild(
+							<i-hstack horizontalAlignment="space-between">
+								<i-label caption={`${rewardSymbol} Locked`} font={{ size: '16px', color: colorText }} />
+								<i-label caption={`${formatNumber(new BigNumber(reward.vestedReward || 0).shiftedBy(rewardLockedDecimalsOffset))} ${rewardSymbol}`} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
+							</i-hstack>
+						);
+						// rowRewards.appendChild(
+						// 	<i-hstack horizontalAlignment="space-between">
+						// 		<i-label caption={`${rewardSymbol} Vesting Start`} font={{ size: '16px', color: colorText }} />
+						// 		<i-label caption={reward.vestingStart ? reward.vestingStart.format('YYYY-MM-DD HH:mm:ss') : 'TBC'} font={{ size: '16px', color: colorText }} />
+						// 	</i-hstack>
+						// );
+						// rowRewards.appendChild(
+						// 	<i-hstack horizontalAlignment="space-between">
+						// 		<i-label caption={`${rewardSymbol} Vesting End`} font={{ size: '16px', color: colorText }} />
+						// 		<i-label caption={reward.vestingEnd ? reward.vestingEnd.format('YYYY-MM-DD HH:mm:ss') : 'TBC'} font={{ size: '16px', color: colorText }} />
+						// 	</i-hstack>
+						// );
+						const passClaimStartTime = !(reward.claimStartTime && moment().diff(moment.unix(reward.claimStartTime)) < 0);
+						let rewardClaimable = `0 ${rewardSymbol}`;
+						if (passClaimStartTime && isClaim) {
+							rewardClaimable = `${formatNumber(new BigNumber(reward.claimable).shiftedBy(decimalsOffset))} ${rewardSymbol}`;
+						}
+						let startClaimingText = '';
+						if (!(!reward.claimStartTime || passClaimStartTime) && isClaim) {
+							const claimStart = moment.unix(reward.claimStartTime).format('YYYY-MM-DD HH:mm:ss');
+							startClaimingText = `(Claim ${rewardSymbol} after ${claimStart})`;
+						}
+						rowRewards.appendChild(
+							<i-hstack horizontalAlignment="space-between">
+								<i-label caption={`${rewardSymbol} Claimable`} font={{ size: '16px', color: colorText }} />
+								<i-label caption={rewardClaimable} font={{ size: '16px', name: 'Montserrat Regular', color: colorText }} />
+								{startClaimingText ? <i-label caption={startClaimingText} font={{ size: '16px', color: colorText }} /> : []}
+							</i-hstack>
+						);
+						const btnClaim = await Button.create({
+							rightIcon: { spin: true, fill: colorText, visible: false },
+							caption: `Claim ${rewardSymbol}`,
+							background: { color: `${colorButton} !important` },
+							font: { color: colorText },
+							enabled: !(!passClaimStartTime || new BigNumber(reward.claimable).isZero()) && isClaim,
+							margin: { left: 'auto', right: 'auto' }
+						})
+						btnClaim.id = `btnClaim-${idx}-${option.address}`;
+						btnClaim.classList.add('btn-os', 'btn-stake');
+						btnClaim.onClick = () => this.onClaim(btnClaim, { reward, rewardSymbol });
+						rowRewards.appendChild(btnClaim);
+					};
 
 					const getAprValue = (rewardOption: any) => {
 						if (rewardOption && aprInfo && aprInfo[rewardOption.rewardTokenAddress]) {
@@ -742,7 +738,7 @@ export class StakingBlock extends Module implements PageBlock {
 					const rewardToken = this.getRewardToken(rewardsData[0].rewardTokenAddress);
 					const rewardIconPath = getTokenIconPath(rewardToken, chainId);
 					stakingElms[optionIdx].appendChild(
-						<i-vstack gap={16} width={700} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
+						<i-vstack gap={16} width={maxWidth} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
 							{ stickerSections[optionIdx] }
 							<i-hstack gap={10} width="100%" verticalAlignment="center">
 								<i-hstack gap={10} width="50%">
@@ -881,7 +877,7 @@ export class StakingBlock extends Module implements PageBlock {
 
 			nodeItems.push(containerSection);
 			containerSection.appendChild(
-				<i-hstack background={{ color: colorCampaignBackground }} width="100%" maxWidth={700} height={321}>
+				<i-hstack background={{ color: colorCampaignBackground }} width="100%" maxWidth={maxWidth} height={maxHeight}>
 					{ stakingsElm }
 				</i-hstack>
 			)
@@ -893,7 +889,7 @@ export class StakingBlock extends Module implements PageBlock {
 	render() {
 		return (
 			<i-panel id="stakingComponent" class="staking-component" minHeight={200}>
-				<i-panel id="stakingLayout" class="staking-layout" width={700} height={321}>
+				<i-panel id="stakingLayout" class="staking-layout" width={maxWidth} height={maxHeight}>
 					<i-vstack id="loadingElm" class="i-loading-overlay">
 						<i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
 							<i-icon
