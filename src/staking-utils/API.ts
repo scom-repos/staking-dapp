@@ -19,6 +19,7 @@ import {
   Staking,
   Reward,
   getWallet,
+  getTokenDecimals,
 } from "@staking/store";
 
 export const getTokenPrice = async (token: string) => { // in USD value
@@ -148,6 +149,92 @@ const getStakingRewardInfoByAddresses = async (option: Reward, providerAddress: 
   catch (err) {
     console.log('err', err)
     return null
+  }
+}
+
+const getDefaultStakingByAddress = async (option: Staking) => {
+  try {
+    let wallet = Wallet.getInstance();
+    let stakingAddress = option.address;
+    let rewards = option.rewards;
+    let hasRewardAddress = rewards.length && rewards[0].address;
+
+    let timeIsMoney = new TimeIsMoneyContracts.TimeIsMoney(wallet, stakingAddress);
+
+    let minimumLockTime = await timeIsMoney.minimumLockTime();
+    let maximumTotalLock = await timeIsMoney.maximumTotalLock();
+
+    let startOfEntryPeriod = '0';
+    try {
+      startOfEntryPeriod = (await timeIsMoney.startOfEntryPeriod()).toFixed();
+    } catch (err) { }
+    let tokenAddress = await timeIsMoney.token();
+    let stakingDecimals = 18 - getTokenDecimals(tokenAddress.toLocaleLowerCase());
+    let endOfEntryPeriod = (await timeIsMoney.endOfEntryPeriod()).toFixed();
+    let perAddressCapWei = await timeIsMoney.perAddressCap();
+    let maxTotalLock = Utils.fromDecimals(maximumTotalLock).shiftedBy(stakingDecimals).toFixed();
+    let perAddressCap = Utils.fromDecimals(perAddressCapWei).shiftedBy(stakingDecimals).toFixed();
+
+    let obj = {
+      minLockTime: minimumLockTime.toNumber(),
+      maxTotalLock,
+      startOfEntryPeriod: parseInt(startOfEntryPeriod) * 1000,
+      endOfEntryPeriod: parseInt(endOfEntryPeriod) * 1000,
+      perAddressCap,
+      lockTokenAddress: tokenAddress,
+    };
+
+    if (hasRewardAddress) {
+      let rewardsData: any[] = [];
+      let promises = rewards.map(async (reward, index) => {
+        return new Promise<void>(async (resolve, reject) => {
+          let rewardsContract, admin, multiplier, initialReward, rewardTokenAddress, vestingPeriod, vestingStartDate, claimDeadline;
+          try {
+            if (reward.isCommonStartDate) {
+              rewardsContract = new TimeIsMoneyContracts.RewardsCommonStartDate(wallet, reward.address);
+            } else {
+              rewardsContract = new TimeIsMoneyContracts.Rewards(wallet, reward.address);
+            }
+            admin = await rewardsContract.admin();
+            let multiplierWei = await rewardsContract.multiplier();
+            multiplier = Utils.fromDecimals(multiplierWei).toFixed();
+            initialReward = Utils.fromDecimals(await rewardsContract.initialReward()).toFixed();
+            rewardTokenAddress = await rewardsContract.token();
+            vestingPeriod = (await rewardsContract.vestingPeriod()).toNumber();
+            claimDeadline = (await rewardsContract.claimDeadline()).toNumber();
+            if (reward.isCommonStartDate) {
+              vestingStartDate = (await (rewardsContract as any).vestingStartDate()).toNumber();
+            }
+            let rewardAmount = new BigNumber(multiplier).multipliedBy(maxTotalLock).toFixed();
+            rewardsData.push({
+              ...reward,
+              rewardTokenAddress,
+              multiplier,
+              initialReward,
+              vestingPeriod,
+              admin,
+              vestingStartDate,
+              rewardAmount,
+              index
+            });
+          } catch {}
+          resolve();
+        })
+      });
+      await Promise.all(promises);
+      return {
+        ...option,
+        ...obj,
+        rewards: rewardsData.sort((a, b) => a.index - b.index)
+      }
+    }
+    else {
+      return obj;
+    }
+  }
+  catch (err) {
+    console.log('err', err);
+    return null;
   }
 }
 
@@ -295,9 +382,14 @@ const composeCampaignInfoList = async (stakingCampaignInfoList: StakingCampaign[
       options: durationOptionsWithExtendedInfo,
     }
     if (durationOptionsWithExtendedInfo.length > 0) {
+      const extendedInfo = durationOptionsWithExtendedInfo[0];
+      const admin = extendedInfo.rewards && extendedInfo.rewards[0] ? extendedInfo.rewards[0].admin : '';
       campaignObj = {
         ...campaignObj,
-        tokenAddress: durationOptionsWithExtendedInfo[0].tokenAddress.toLowerCase()
+        admin,
+        campaignStart: extendedInfo.startOfEntryPeriod / 1000,
+        campaignEnd: extendedInfo.endOfEntryPeriod / 1000,
+        tokenAddress: extendedInfo.tokenAddress?.toLowerCase()
       }
     }
     campaigns.push(campaignObj);
@@ -305,7 +397,7 @@ const composeCampaignInfoList = async (stakingCampaignInfoList: StakingCampaign[
   return campaigns;
 }
 
-const getAllCampaignsInfo = async (stakingInfo: { [key: number]: StakingCampaign[] }) => {
+const getAllCampaignsInfo = async (stakingInfo: { [key: number]: StakingCampaign[] }, imported?: boolean) => {
   let wallet = Wallet.getInstance();
   let chainId = wallet.chainId;
   let stakingCampaignInfoList = stakingInfo[chainId];
@@ -316,7 +408,12 @@ const getAllCampaignsInfo = async (stakingInfo: { [key: number]: StakingCampaign
   let promises = allCampaignOptions.map(async (option: any, index: any) => {
     return new Promise<void>(async (resolve, reject) => {
       try {
-        let optionExtendedInfo = await getStakingOptionExtendedInfoByAddress(option);
+        let optionExtendedInfo;
+        if (imported) {
+          optionExtendedInfo = await getDefaultStakingByAddress(option);
+        } else {
+          optionExtendedInfo = await getStakingOptionExtendedInfoByAddress(option);
+        }
         if (optionExtendedInfo) optionExtendedInfoMap[option.address] = optionExtendedInfo;
       }
       catch (error) { }
@@ -333,6 +430,19 @@ const getAllCampaignsInfo = async (stakingInfo: { [key: number]: StakingCampaign
       })
     }
   })
+  if (imported) {
+    if (campaigns && campaigns.length) {
+      return {
+        [chainId]: campaigns.map(campaign => {
+          return {
+            ...campaign,
+            stakings: campaign.options,
+          }
+        })
+      }
+    }
+    return null;
+  }
   return campaigns;
 }
 

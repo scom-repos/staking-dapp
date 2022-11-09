@@ -10412,7 +10412,13 @@
           };
         }
       };
-      this.convertJSONToObj = (result) => {
+      this.setEnableImportButton = (enabled) => {
+        this.btnAddNew.enabled = enabled;
+        this.btnImportNew.enabled = enabled;
+        this.btnImportExisting.enabled = enabled;
+        this.btnImportExisting.rightIcon.visible = !enabled;
+      };
+      this.convertJSONToObj = async (result) => {
         if (!result)
           this.showImportJsonError("Data is corrupted. No data were recovered.");
         try {
@@ -10420,17 +10426,24 @@
           const length = Object.keys(obj).length;
           const chainId = (0, import_store10.getChainId)();
           const campaignObj = obj[chainId];
+          const network = (0, import_store10.getNetworkInfo)(chainId);
           if (!length) {
             this.showImportJsonError("No data found in the imported file.");
           } else if (this.isImportNewCampaign && !campaignObj) {
-            const network = (0, import_store10.getNetworkInfo)(chainId);
             this.showImportJsonError(`No data found in ${network == null ? void 0 : network.name} network.`);
           } else {
             if (this.isImportNewCampaign) {
               const data = { [chainId]: [campaignObj[0]] };
               this.onEditCampaign(true, data);
             } else {
-              this.onEditCampaign(false, obj);
+              this.setEnableImportButton(false);
+              const info = await (0, import_staking_utils3.getAllCampaignsInfo)(obj, true);
+              this.setEnableImportButton(true);
+              if (!info || !info.length) {
+                this.showImportJsonError(`No data found in ${network == null ? void 0 : network.name} network.`);
+              } else {
+                this.onEditCampaign(false, info);
+              }
             }
           }
         } catch (e) {
@@ -10642,22 +10655,26 @@
           verticalAlignment: "center",
           horizontalAlignment: "center"
         }, /* @__PURE__ */ this.$render("i-button", {
+          id: "btnAddNew",
           maxWidth: 220,
           caption: "Add New Campaign",
           class: "btn-os btn-stake",
           font: { size: "14px" },
           onClick: () => this.onEditCampaign(true)
         }), /* @__PURE__ */ this.$render("i-button", {
+          id: "btnImportNew",
           maxWidth: 220,
           caption: "Import New Campaign",
           class: "btn-os btn-stake",
           font: { size: "14px" },
           onClick: () => onImportCampaign(true)
         }), /* @__PURE__ */ this.$render("i-button", {
+          id: "btnImportExisting",
           maxWidth: 220,
           caption: "Import Existing Campaign",
           class: "btn-os btn-stake",
           font: { size: "14px" },
+          rightIcon: { visible: false, spin: true, fill: "#fff" },
           onClick: () => onImportCampaign(false)
         }), importFileElm, /* @__PURE__ */ this.$render("i-modal", {
           id: "importFileErrModal",

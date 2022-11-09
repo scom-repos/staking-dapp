@@ -8,7 +8,6 @@ import {
 	getERC20RewardCurrentAPR,
 	getLPRewardCurrentAPR,
 	getVaultRewardCurrentAPR,
-	withdrawToken,
 	claimToken,
 	getAllCampaignsInfo,
 } from '@staking/staking-utils';
@@ -59,6 +58,9 @@ export class StakingBlock extends Module implements PageBlock {
 	private importFileErrModal: Modal;
   private importFileErr: Label;
 	private isImportNewCampaign = false;
+	private btnAddNew: Button;
+	private btnImportNew: Button;
+	private btnImportExisting: Button;
 
 	validateConfig() {
 
@@ -141,24 +143,38 @@ export class StakingBlock extends Module implements PageBlock {
     }
   }
 
-	private convertJSONToObj = (result: any) => {
+	private setEnableImportButton = (enabled: boolean) => {
+		this.btnAddNew.enabled = enabled;
+		this.btnImportNew.enabled = enabled;
+		this.btnImportExisting.enabled = enabled;
+		this.btnImportExisting.rightIcon.visible = !enabled;
+	}
+
+	private convertJSONToObj = async (result: any) => {
     if (!result) this.showImportJsonError('Data is corrupted. No data were recovered.');
 		try {
 			const obj = JSON.parse(result);
 			const length = Object.keys(obj).length;
 			const chainId = getChainId();
 			const campaignObj = obj[chainId];
+			const network = getNetworkInfo(chainId);
 			if (!length) {
 				this.showImportJsonError('No data found in the imported file.');
 			} else if (this.isImportNewCampaign && !campaignObj) {
-				const network = getNetworkInfo(chainId);
 				this.showImportJsonError(`No data found in ${network?.name} network.`);
 			} else {
 				if (this.isImportNewCampaign) {
 					const data = { [chainId]: [campaignObj[0]] };
 					this.onEditCampaign(true, data);
 				} else {
-					this.onEditCampaign(false, obj);
+					this.setEnableImportButton(false);
+					const info: any = await getAllCampaignsInfo(obj, true);
+					this.setEnableImportButton(true);
+					if (!info || !info.length) {
+						this.showImportJsonError(`No data found in ${network?.name} network.`);
+					} else {
+						this.onEditCampaign(false, info);
+					}
 				}
 			}
 		} catch {
@@ -401,9 +417,9 @@ export class StakingBlock extends Module implements PageBlock {
 					{
 						isBtnShown ? (
 							<i-hstack gap={10} margin={{ top: 10 }} verticalAlignment="center" horizontalAlignment="center">
-								<i-button maxWidth={220} caption="Add New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => this.onEditCampaign(true)} />
-								<i-button maxWidth={220} caption="Import New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => onImportCampaign(true)} />
-								<i-button maxWidth={220} caption="Import Existing Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => onImportCampaign(false)} />
+								<i-button id="btnAddNew" maxWidth={220} caption="Add New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => this.onEditCampaign(true)} />
+								<i-button id="btnImportNew" maxWidth={220} caption="Import New Campaign" class="btn-os btn-stake" font={{ size: '14px' }} onClick={() => onImportCampaign(true)} />
+								<i-button id="btnImportExisting" maxWidth={220} caption="Import Existing Campaign" class="btn-os btn-stake" font={{ size: '14px' }} rightIcon={{ visible: false, spin: true, fill: '#fff' }} onClick={() => onImportCampaign(false)} />
 								{ importFileElm }
 								<i-modal id="importFileErrModal" maxWidth="100%" width={420} title="Import Campaign Error" closeIcon={{ name: 'times' }}>
 									<i-vstack gap={20} margin={{ bottom: 10 }} verticalAlignment="center" horizontalAlignment="center">

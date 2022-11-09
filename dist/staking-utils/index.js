@@ -19148,6 +19148,83 @@ var getStakingRewardInfoByAddresses = async (option, providerAddress, releaseTim
     return null;
   }
 };
+var getDefaultStakingByAddress = async (option) => {
+  try {
+    let wallet = import_eth_wallet4.Wallet.getInstance();
+    let stakingAddress = option.address;
+    let rewards = option.rewards;
+    let hasRewardAddress = rewards.length && rewards[0].address;
+    let timeIsMoney = new import_time_is_money_sdk.Contracts.TimeIsMoney(wallet, stakingAddress);
+    let minimumLockTime = await timeIsMoney.minimumLockTime();
+    let maximumTotalLock = await timeIsMoney.maximumTotalLock();
+    let startOfEntryPeriod = "0";
+    try {
+      startOfEntryPeriod = (await timeIsMoney.startOfEntryPeriod()).toFixed();
+    } catch (err) {
+    }
+    let tokenAddress = await timeIsMoney.token();
+    let stakingDecimals = 18 - (0, import_store.getTokenDecimals)(tokenAddress.toLocaleLowerCase());
+    let endOfEntryPeriod = (await timeIsMoney.endOfEntryPeriod()).toFixed();
+    let perAddressCapWei = await timeIsMoney.perAddressCap();
+    let maxTotalLock = import_eth_wallet4.Utils.fromDecimals(maximumTotalLock).shiftedBy(stakingDecimals).toFixed();
+    let perAddressCap = import_eth_wallet4.Utils.fromDecimals(perAddressCapWei).shiftedBy(stakingDecimals).toFixed();
+    let obj = {
+      minLockTime: minimumLockTime.toNumber(),
+      maxTotalLock,
+      startOfEntryPeriod: parseInt(startOfEntryPeriod) * 1e3,
+      endOfEntryPeriod: parseInt(endOfEntryPeriod) * 1e3,
+      perAddressCap,
+      lockTokenAddress: tokenAddress
+    };
+    if (hasRewardAddress) {
+      let rewardsData = [];
+      let promises = rewards.map(async (reward, index) => {
+        return new Promise(async (resolve, reject) => {
+          let rewardsContract, admin, multiplier, initialReward, rewardTokenAddress, vestingPeriod, vestingStartDate, claimDeadline;
+          try {
+            if (reward.isCommonStartDate) {
+              rewardsContract = new import_time_is_money_sdk.Contracts.RewardsCommonStartDate(wallet, reward.address);
+            } else {
+              rewardsContract = new import_time_is_money_sdk.Contracts.Rewards(wallet, reward.address);
+            }
+            admin = await rewardsContract.admin();
+            let multiplierWei = await rewardsContract.multiplier();
+            multiplier = import_eth_wallet4.Utils.fromDecimals(multiplierWei).toFixed();
+            initialReward = import_eth_wallet4.Utils.fromDecimals(await rewardsContract.initialReward()).toFixed();
+            rewardTokenAddress = await rewardsContract.token();
+            vestingPeriod = (await rewardsContract.vestingPeriod()).toNumber();
+            claimDeadline = (await rewardsContract.claimDeadline()).toNumber();
+            if (reward.isCommonStartDate) {
+              vestingStartDate = (await rewardsContract.vestingStartDate()).toNumber();
+            }
+            let rewardAmount = new import_eth_wallet4.BigNumber(multiplier).multipliedBy(maxTotalLock).toFixed();
+            rewardsData.push(__spreadProps(__spreadValues({}, reward), {
+              rewardTokenAddress,
+              multiplier,
+              initialReward,
+              vestingPeriod,
+              admin,
+              vestingStartDate,
+              rewardAmount,
+              index
+            }));
+          } catch (e) {
+          }
+          resolve();
+        });
+      });
+      await Promise.all(promises);
+      return __spreadProps(__spreadValues(__spreadValues({}, option), obj), {
+        rewards: rewardsData.sort((a, b) => a.index - b.index)
+      });
+    } else {
+      return obj;
+    }
+  } catch (err) {
+    console.log("err", err);
+    return null;
+  }
+};
 var getStakingOptionExtendedInfoByAddress = async (option) => {
   try {
     let wallet = import_eth_wallet4.Wallet.getInstance();
@@ -19257,6 +19334,7 @@ var getStakingOptionExtendedInfoByAddress = async (option) => {
   }
 };
 var composeCampaignInfoList = async (stakingCampaignInfoList, addDurationOption) => {
+  var _a;
   let campaigns = [];
   for (let i = 0; i < stakingCampaignInfoList.length; i++) {
     let stakingCampaignInfo = stakingCampaignInfoList[i];
@@ -19273,15 +19351,20 @@ var composeCampaignInfoList = async (stakingCampaignInfoList, addDurationOption)
       options: durationOptionsWithExtendedInfo
     });
     if (durationOptionsWithExtendedInfo.length > 0) {
+      const extendedInfo = durationOptionsWithExtendedInfo[0];
+      const admin = extendedInfo.rewards && extendedInfo.rewards[0] ? extendedInfo.rewards[0].admin : "";
       campaignObj = __spreadProps(__spreadValues({}, campaignObj), {
-        tokenAddress: durationOptionsWithExtendedInfo[0].tokenAddress.toLowerCase()
+        admin,
+        campaignStart: extendedInfo.startOfEntryPeriod / 1e3,
+        campaignEnd: extendedInfo.endOfEntryPeriod / 1e3,
+        tokenAddress: (_a = extendedInfo.tokenAddress) == null ? void 0 : _a.toLowerCase()
       });
     }
     campaigns.push(campaignObj);
   }
   return campaigns;
 };
-var getAllCampaignsInfo = async (stakingInfo) => {
+var getAllCampaignsInfo = async (stakingInfo, imported) => {
   let wallet = import_eth_wallet4.Wallet.getInstance();
   let chainId = wallet.chainId;
   let stakingCampaignInfoList = stakingInfo[chainId];
@@ -19292,7 +19375,12 @@ var getAllCampaignsInfo = async (stakingInfo) => {
   let promises = allCampaignOptions.map(async (option, index) => {
     return new Promise(async (resolve, reject) => {
       try {
-        let optionExtendedInfo = await getStakingOptionExtendedInfoByAddress(option);
+        let optionExtendedInfo;
+        if (imported) {
+          optionExtendedInfo = await getDefaultStakingByAddress(option);
+        } else {
+          optionExtendedInfo = await getStakingOptionExtendedInfoByAddress(option);
+        }
         if (optionExtendedInfo)
           optionExtendedInfoMap[option.address] = optionExtendedInfo;
       } catch (error) {
@@ -19306,6 +19394,18 @@ var getAllCampaignsInfo = async (stakingInfo) => {
       options.push(__spreadValues(__spreadValues({}, defaultOption), optionExtendedInfoMap[defaultOption.address]));
     }
   });
+  if (imported) {
+    if (campaigns && campaigns.length) {
+      return {
+        [chainId]: campaigns.map((campaign) => {
+          return __spreadProps(__spreadValues({}, campaign), {
+            stakings: campaign.options
+          });
+        })
+      };
+    }
+    return null;
+  }
   return campaigns;
 };
 var getStakingTotalLocked = async (stakingAddress) => {
