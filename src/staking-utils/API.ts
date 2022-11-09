@@ -431,17 +431,12 @@ const getAllCampaignsInfo = async (stakingInfo: { [key: number]: StakingCampaign
     }
   })
   if (imported) {
-    if (campaigns && campaigns.length) {
+    return campaigns.map(campaign => {
       return {
-        [chainId]: campaigns.map(campaign => {
-          return {
-            ...campaign,
-            stakings: campaign.options,
-          }
-        })
+        ...campaign,
+        stakings: campaign.options,
       }
-    }
-    return null;
+    })
   }
   return campaigns;
 }

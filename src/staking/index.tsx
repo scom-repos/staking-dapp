@@ -173,7 +173,7 @@ export class StakingBlock extends Module implements PageBlock {
 					if (!info || !info.length) {
 						this.showImportJsonError(`No data found in ${network?.name} network.`);
 					} else {
-						this.onEditCampaign(false, info);
+						this.onEditCampaign(false, { [chainId]: info });
 					}
 				}
 			}

@@ -10442,7 +10442,7 @@
               if (!info || !info.length) {
                 this.showImportJsonError(`No data found in ${network == null ? void 0 : network.name} network.`);
               } else {
-                this.onEditCampaign(false, info);
+                this.onEditCampaign(false, { [chainId]: info });
               }
             }
           }

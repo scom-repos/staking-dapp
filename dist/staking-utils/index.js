@@ -19395,16 +19395,11 @@ var getAllCampaignsInfo = async (stakingInfo, imported) => {
     }
   });
   if (imported) {
-    if (campaigns && campaigns.length) {
-      return {
-        [chainId]: campaigns.map((campaign) => {
-          return __spreadProps(__spreadValues({}, campaign), {
-            stakings: campaign.options
-          });
-        })
-      };
-    }
-    return null;
+    return campaigns.map((campaign) => {
+      return __spreadProps(__spreadValues({}, campaign), {
+        stakings: campaign.options
+      });
+    });
   }
   return campaigns;
 };
