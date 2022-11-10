@@ -805,7 +805,7 @@ export class StakingBlock extends Module implements PageBlock {
 										const aprValue = getAprValue(rewardOption);
 										lbApr.caption = `APR ${aprValue}`;
 										lbRate.caption = rateDesc;
-										return <i-vstack gap={2} verticalAlignment="center">
+										return <i-vstack verticalAlignment="center">
 											{lbApr}
 											{lbRate}
 										</i-vstack>

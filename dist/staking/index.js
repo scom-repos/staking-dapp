@@ -6405,7 +6405,7 @@
       };
       this.onInputAmount = () => {
         var _a;
-        if (!this.inputAmount.enabled)
+        if (this.inputAmount.enabled === false)
           return;
         this.currentMode = 0;
         (0, import_global2.limitInputNumber)(this.inputAmount, ((_a = this.lockedTokenObject) == null ? void 0 : _a.decimals) || 18);
@@ -11091,7 +11091,6 @@
               lbApr.caption = `APR ${aprValue}`;
               lbRate.caption = rateDesc;
               return /* @__PURE__ */ this.$render("i-vstack", {
-                gap: 2,
                 verticalAlignment: "center"
               }, lbApr, lbRate);
             }))), /* @__PURE__ */ this.$render("i-hstack", {

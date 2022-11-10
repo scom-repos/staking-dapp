@@ -112,7 +112,7 @@ export class ManageStake extends Module {
   }
 
   private onInputAmount = () => {
-    if (!this.inputAmount.enabled) return;
+    if (this.inputAmount.enabled === false) return;
     this.currentMode = CurrentMode.STAKE;
     limitInputNumber(this.inputAmount, this.lockedTokenObject?.decimals || 18);
     this.approvalModelAction.checkAllowance(this.lockedTokenObject, this.inputAmount.value);
