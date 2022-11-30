@@ -18,7 +18,7 @@
         "@ijstech/eth-wallet": "0.1.27",
         "@openswap/sdk": "https://github.com/nigellai2020/openswap-sdk",
         "@validapp/cross-chain-token-sdk": "https://github.com/valid-app/cross-chain-token-sdk",
-        "@validapp/time-is-money-sdk": "https://github.com/valid-app/time-is-money-sdk",
+        "@validapp/time-is-money-sdk": "https://github.com/nigellai2020/time-is-money-sdk",
         "@openswap/chainlink-sdk": "0.1.0",
         "@openswap/cross-chain-bridge-sdk": "0.1.1",
         "@types/node": "14.17",
