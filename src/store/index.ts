@@ -1,4 +1,5 @@
-import { Erc20, Wallet } from '@ijstech/eth-wallet';
+import { Erc20, Wallet, WalletPlugin } from '@ijstech/eth-wallet';
+import { application } from '@ijstech/components';
 import {
   ITokenObject,
   SITE_ENV,
@@ -8,65 +9,16 @@ import {
   EventId,
 } from '@staking/global';
 
-import Assets from '@staking/assets';
 import { Contracts } from '@openswap/sdk';
-import { isWalletConnected } from './wallet';
+import Assets from '@staking/assets';
 import {
   DefaultTokens,
   CoreContractAddressesByChainId,
   ChainNativeTokenByChainId,
   WETHByChainId,
   getTokenIconPath,
-} from './data';
-import { application } from '@ijstech/components';
-
-export {isWalletConnected, hasWallet, hasMetaMask, truncateAddress, switchNetwork, connectWallet, logoutWallet} from './wallet';
-export {walletList} from './walletList';
-export {
-  //token
-  DefaultERC20Tokens,
-  ChainNativeTokenByChainId,
-  WETHByChainId,
-  DefaultTokens,
-  ToUSDPriceFeedAddressesMap,
-  tokenPriceAMMReference,
-  getTokenIconPath,
-  getOpenSwapToken,
-
-  //networks
-  Networks,
-  InfuraId,
-
-  //core
-  CoreContractAddressesByChainId,
-  
-  //staking
-  StakingCampaign,
-  Staking,
-  Reward,
-  RewardNeeded,
   LockTokenType,
-  LockTokenTypeList,
-  USDPeggedTokenAddressMap,
-  
-  //cross-chain
-  baseRoute,
-  crossChainNativeTokenList,
-  getBridgeVaultVersion,
-  BridgeVaultGroupList,
-  ChainTrollRegistryMap,
-  CrossChainAddressMap,
-  MockOracleMap,
-  VaultOrderStatus,
-  VaultType,
-  TrollType,
-  TrollTypeStringEnumMap,
-  TrollStatus,
-  VaultActionType,
-  TrollManagementActionType,
-  BridgeVaultConstant,
-
-} from './data'
+} from './data/index';
 
 export const fallBackUrl = Assets.fullPath('img/tokens/token-placeholder.svg');
 
@@ -492,3 +444,201 @@ export const setStakingStatus = (key: string, value: boolean, text: string) => {
 export const getStakingStatus = (key: string) => {
   return state.stakingStatusMap[key] || { value : false, text: 'Stake' };
 }
+
+// Wallet
+export const walletList = [
+  {
+      name: WalletPlugin.MetaMask,
+      displayName: 'MetaMask',
+      iconFile: 'metamask.png'
+  },
+  {
+      name: WalletPlugin.BitKeepWallet,
+      displayName: 'BitKeep Wallet',
+      iconFile: 'BitKeep.png'
+  },
+  {
+      name: WalletPlugin.ONTOWallet,
+      displayName: 'ONTO Wallet',
+      iconFile: 'ONTOWallet.jpg'
+  },
+  {
+      name: WalletPlugin.Coin98,
+      displayName: 'Coin98 Wallet',
+      iconFile: 'Coin98.svg'
+  },
+  {
+      name: WalletPlugin.TrustWallet,
+      displayName: 'Trust Wallet',
+      iconFile: 'trustwallet.svg'
+  },
+  {
+      name: WalletPlugin.BinanceChainWallet,
+      displayName: 'Binance Chain Wallet',
+      iconFile: 'binance-chain-wallet.svg'
+  },
+  {
+      name: WalletPlugin.WalletConnect,
+      displayName: 'WalletConnect',
+      iconFile: 'walletconnect.svg'
+  }
+]
+
+export const getWalletOptions = (): { [key in WalletPlugin]?: any } => {
+  let networkList = getSiteSupportedNetworks();
+  const rpcs: {[chainId: number]:string} = {}
+  for (const network of networkList) {
+      let rpc = network.rpc
+      if ( rpc ) rpcs[network.chainId] = rpc;
+  }
+  return {
+      [WalletPlugin.WalletConnect]: {
+          infuraId: getInfuraId(),
+          bridge: "https://bridge.walletconnect.org",
+          rpc: rpcs
+      }
+  }
+}
+
+export function isWalletConnected() {
+  const wallet = Wallet.getInstance();
+  return wallet.isConnected;
+}
+
+export async function connectWallet(walletPlugin: WalletPlugin, eventHandlers?: { [key: string]: Function }) {
+  let wallet = Wallet.getInstance();
+  const walletOptions = getWalletOptions();
+  let providerOptions = walletOptions[walletPlugin];
+  if (!wallet.chainId) {
+    wallet.chainId = getDefaultChainId();
+  }
+  await wallet.connect(walletPlugin, {
+    onAccountChanged: async (account: string) => {
+      if (eventHandlers && eventHandlers.accountsChanged) {
+        eventHandlers.accountsChanged(account);
+      }
+      const connected = !!account;
+      if (connected) {
+        localStorage.setItem('walletProvider', Wallet.getInstance()?.clientSideProvider?.walletPlugin || '');
+        if (wallet.chainId !== getCurrentChainId()) {
+          setCurrentChainId(wallet.chainId);
+          application.EventBus.dispatch(EventId.chainChanged, wallet.chainId);
+        }
+        await updateAllTokenBalances();
+      }
+      application.EventBus.dispatch(EventId.IsWalletConnected, connected);
+    },
+    onChainChanged: async (chainIdHex: string) => {
+      //console.log('onChainChanged', chainIdHex);
+      const chainId = Number(chainIdHex);
+
+      if (eventHandlers && eventHandlers.chainChanged) {
+        eventHandlers.chainChanged(chainId);
+      }
+      setCurrentChainId(chainId);
+      await updateAllTokenBalances();
+      application.EventBus.dispatch(EventId.chainChanged, chainId);
+    }
+  }, providerOptions)
+  return wallet;
+}
+
+export async function switchNetwork(chainId: number) {
+  if (!isWalletConnected()) {
+    setCurrentChainId(chainId);
+    Wallet.getInstance().chainId = chainId;
+    application.EventBus.dispatch(EventId.chainChanged, chainId);
+    return;
+  }
+  const wallet = Wallet.getInstance();
+  if (wallet?.clientSideProvider?.walletPlugin === WalletPlugin.MetaMask) {
+    await wallet.switchNetwork(chainId);
+  }
+}
+
+export async function logoutWallet() {
+  const wallet = Wallet.getInstance();
+  await wallet.disconnect();
+  localStorage.setItem('walletProvider', '');
+  application.EventBus.dispatch(EventId.IsWalletDisconnected, false);
+}
+
+export const hasWallet = function () {
+  let hasWallet = false;
+  for (let wallet of walletList) {
+    if (Wallet.isInstalled(wallet.name)) {
+      hasWallet = true;
+      break;
+    } 
+  }
+  return hasWallet;
+}
+
+export const hasMetaMask = function () {
+  return Wallet.isInstalled(WalletPlugin.MetaMask);
+}
+
+// staking common
+export const getLockedTokenObject = (info: any, tokenInfo: any, tokenMap?: any) => {
+  if (info) {
+    if (info.lockTokenType == LockTokenType.ERC20_Token) {
+      if (!tokenMap) {
+        tokenMap = getTokenMap();
+      }
+      return tokenMap[tokenInfo.tokenAddress];
+    }
+    if (info.lockTokenType == LockTokenType.LP_Token && tokenInfo.lpToken) {
+      return tokenInfo.lpToken.object;
+    }
+    else if (info.lockTokenType == LockTokenType.VAULT_Token && tokenInfo.vaultToken) {
+      return tokenInfo.vaultToken.object;
+    }
+  }
+  return null;
+}
+
+export const getLockedTokenSymbol = (info: any, token: any) => {
+  if (info) {
+    if (info.lockTokenType == LockTokenType.ERC20_Token) {
+      return token ? token.symbol : '';
+    }
+    if (info.lockTokenType == LockTokenType.LP_Token) {
+      return 'LP';
+    }
+    if (info.lockTokenType == LockTokenType.VAULT_Token) {
+      return token ? `vt${token.assetToken.symbol}` : '';
+    }
+  }
+  return '';
+}
+
+export const getLockedTokenIconPaths = (info: any, tokenObject: any, chainId: number, tokenMap?: any) => {
+  if (info && tokenObject) {
+    if (!tokenMap) {
+      tokenMap = getTokenMap();
+    }
+    if (info.lockTokenType == LockTokenType.ERC20_Token) {
+      return [getTokenIconPath(tokenObject, chainId)];
+    }
+    if (info.lockTokenType == LockTokenType.LP_Token) {
+      const nativeToken = DefaultTokens[chainId]?.find((token) => token.isNative);
+      const token0 = tokenMap[tokenObject.token0] || nativeToken;
+      const token1 = tokenMap[tokenObject.token1] || nativeToken;
+      return [getTokenIconPath(token0, chainId), getTokenIconPath(token1, chainId)];
+    }
+    if (info.lockTokenType == LockTokenType.VAULT_Token) {
+      return [getTokenIconPath(tokenObject.assetToken, chainId)];
+    }
+  }
+  return [];
+}
+
+export const baseUrl = 'https://openswap.xyz/#';
+
+export const getTokenUrl = `${baseUrl}/swap`;
+export const isThemeApplied = false;
+export const isMultiple = false;
+export const maxWidth = '690px';
+export const maxHeight = '321px';
+
+export * from './data/index'

@@ -7,16 +7,28 @@ export {
   tokenPriceAMMReference,
   getTokenIconPath,
   getOpenSwapToken,
-} from './tokens';
+} from './tokens/index';
 
-export {CoreContractAddressesByChainId} from './core';
+export {
+  InfuraId,
+  Networks,
+} from './networks/index';
 
-export * from './staking';
+export { CoreContractAddressesByChainId } from './core/index';
+
+export {
+  StakingCampaign,
+  Staking,
+  Reward,
+  RewardNeeded,
+  LockTokenType,
+  LockTokenTypeList,
+  USDPeggedTokenAddressMap,
+} from './staking/index';
 
 export {
   baseRoute,
   crossChainNativeTokenList,
-  getBridgeVaultVersion,
   BridgeVaultGroupList,
   ChainTrollRegistryMap,
   CrossChainAddressMap,
@@ -29,9 +41,4 @@ export {
   VaultActionType,
   TrollManagementActionType,
   BridgeVaultConstant,
-} from './cross-chain'
-
-export {
-  InfuraId,
-  Networks,
-} from './networks';
+} from './cross-chain/index'
