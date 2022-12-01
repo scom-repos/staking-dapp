@@ -227,7 +227,7 @@ export class StakingBlock extends Module implements PageBlock {
 	private isWalletValid = async (isConnected: boolean) => {
 		if (this.data && isConnected) {
 			try {
-				const wallet = Wallet.getInstance();
+				const wallet = Wallet.getInstance() as any;
 				const infoList = this.data[wallet.chainId];
 				const stakingAddress = infoList && infoList[0].stakings[0]?.address;
 				if (stakingAddress) {
