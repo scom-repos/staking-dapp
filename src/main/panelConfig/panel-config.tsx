@@ -253,7 +253,7 @@ export class PanelConfig extends Module {
     if (this.isNew) {
       if (this.btnDeployExport.rightIcon.visible) return;
       const currentAddress = Wallet.getInstance().address || '';
-      const data = this.campaignConfig && this.campaignConfig[0].getData();
+      const data = this.campaignConfig && this.campaignConfig[0]?.getData();
       this.btnExport.enabled = valid;
       this.btnDeployExport.enabled = valid && currentAddress.toLowerCase() === data?.admin?.toLowerCase();
     } else {

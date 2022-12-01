@@ -3,7 +3,7 @@ import { BigNumber, Wallet, WalletPlugin } from '@ijstech/eth-wallet';
 import '@ijstech/eth-contract';
 import Assets from '@staking/assets';
 import { formatNumber, formatDate, registerSendTxEvents, TokenMapType, PageBlock, EventId } from '@staking/global';
-import { InfuraId, Networks, getChainId, getTokenMap, getTokenIconPath, viewOnExplorerByAddress, isWalletConnected, getNetworkInfo, setTokenMap, getDefaultChainId, hasWallet, connectWallet, setDataFromSCConfig, setCurrentChainId, tokenSymbol, LockTokenType, getStakingStatus, StakingCampaign, fallBackUrl, getLockedTokenObject, getLockedTokenSymbol, getLockedTokenIconPaths, getTokenUrl, isThemeApplied, maxHeight, maxWidth } from '@staking/store';
+import { InfuraId, Networks, getChainId, getTokenMap, getTokenIconPath, viewOnExplorerByAddress, isWalletConnected, getNetworkInfo, setTokenMap, getDefaultChainId, hasWallet, connectWallet, setDataFromSCConfig, setCurrentChainId, tokenSymbol, LockTokenType, getStakingStatus, StakingCampaign, fallBackUrl, getLockedTokenObject, getLockedTokenSymbol, getLockedTokenIconPaths, getTokenUrl, isThemeApplied, maxHeight, maxWidth, hasMetaMask } from '@staking/store';
 import {
 	getStakingTotalLocked,
 	getLPObject,
@@ -249,7 +249,10 @@ export class StakingBlock extends Module implements PageBlock {
 		let chainChangedEventHandler = async (hexChainId: number) => {
 			setTokenMap();
 		}
-		const selectedProvider = localStorage.getItem('walletProvider') as WalletPlugin;
+		let selectedProvider = localStorage.getItem('walletProvider') as WalletPlugin;
+		if (!selectedProvider && hasMetaMask()) {
+			selectedProvider = WalletPlugin.MetaMask;
+		}
 		const isValidProvider = Object.values(WalletPlugin).includes(selectedProvider);
 		if (!Wallet.getInstance().chainId) {
 			Wallet.getInstance().chainId = getDefaultChainId();

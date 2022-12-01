@@ -1,0 +1,78 @@
+{
+    "name": "@staking/main",
+    "env": "mainnet",
+    "version": "0.1.0",
+    "moduleDir": "modules",
+    "main": "@staking/main",
+    "modules": {
+        "@staking/assets": {
+            "path": "assets",
+            "dependencies": []
+        },
+        "@staking/global": {
+            "path": "global",
+            "dependencies": [
+                "@ijstech/eth-wallet",
+                "@openswap/sdk"
+            ]
+        },
+        "@staking/store": {
+            "path": "store",
+            "dependencies": [
+                "@ijstech/eth-wallet",
+                "@staking/global",
+                "@openswap/sdk",
+                "@staking/assets"
+            ]
+        },
+        "@staking/staking-utils": {
+            "path": "staking-utils",
+            "dependencies": [
+                "@ijstech/eth-wallet",
+                "@validapp/time-is-money-sdk",
+                "@openswap/sdk",
+                "@openswap/chainlink-sdk",
+                "@openswap/cross-chain-bridge-sdk",
+                "@staking/global",
+                "@staking/assets",
+                "@staking/store"
+            ]
+        },
+        "@staking/result": {
+            "path": "result",
+            "dependencies": [
+                "@ijstech/eth-wallet",
+                "@ijstech/eth-contract",
+                "@openswap/sdk",
+                "@staking/global",
+                "@staking/store",
+                "@staking/assets"
+            ]
+        },
+        "@staking/main": {
+            "path": "main",
+            "dependencies": [
+                "@ijstech/eth-wallet",
+                "@ijstech/eth-contract",
+                "@staking/assets",
+                "@openswap/sdk",
+                "@staking/global",
+                "@staking/store",
+                "@openswap/cross-chain-bridge-sdk",
+                "@openswap/chainlink-sdk",
+                "@staking/staking-utils",
+                "@staking/result",
+                "@validapp/time-is-money-sdk"
+            ]
+        }
+    },
+    "dependencies": {
+        "@ijstech/eth-wallet": "*",
+        "@ijstech/eth-contract": "*",
+        "@validapp/time-is-money-sdk": "*",
+        "@validapp/cross-chain-token-sdk": "*",
+        "@openswap/cross-chain-bridge-sdk": "*",
+        "@openswap/chainlink-sdk": "*",
+        "@openswap/sdk": "*"
+    }
+}

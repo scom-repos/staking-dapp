@@ -161,7 +161,7 @@ export class StakingConfig extends Module {
 				if (this.isInitialized && this.tokenSelection.isInitialized) {
 					clearInterval(interval);
 					const tokenMap = getTokenMapData(this.chainId);
-					const token = tokenMap[lockTokenAddress] || tokenMap[lockTokenAddress.toLowerCase()];
+					const token = tokenMap[lockTokenAddress] || tokenMap[lockTokenAddress?.toLowerCase()];
 					const lockingTime = new BigNumber(minLockTime);
 					this.inputAddress.value = address;
 					this.isAddressValid = true;

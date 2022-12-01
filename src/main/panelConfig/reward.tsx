@@ -155,7 +155,7 @@ export class RewardConfig extends Module {
 				if (this.isInitialized && this.tokenSelection.isInitialized) {
 					clearInterval(interval);
 					const tokenMap = getTokenMapData(this.chainId);
-					const token = tokenMap[rewardTokenAddress] || tokenMap[rewardTokenAddress.toLowerCase()];
+					const token = tokenMap[rewardTokenAddress] || tokenMap[rewardTokenAddress?.toLowerCase()];
 					this.inputAddress.value = address;
 					this.isAddressValid = true;
 					this.token = token;
@@ -273,7 +273,7 @@ export class RewardConfig extends Module {
 	}
 
 	private setAdminClaimDeadline = (value: number | BigNumber) => {
-		const date = new BigNumber(value || 0).toNumber();
+		const date = new BigNumber(value || moment('31/12/9999 23:59:59', DefaultDateTimeFormat).unix()).toNumber();
 		this.adminClaimDeadline = date;
 		const elm = this.inputAdminClaimDeadline.querySelector('input[type="text"]') as HTMLInputElement;
 		if (date) {

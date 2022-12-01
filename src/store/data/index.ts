@@ -26,19 +26,3 @@ export {
   USDPeggedTokenAddressMap,
 } from './staking/index';
 
-export {
-  baseRoute,
-  crossChainNativeTokenList,
-  BridgeVaultGroupList,
-  ChainTrollRegistryMap,
-  CrossChainAddressMap,
-  MockOracleMap,
-  VaultOrderStatus,
-  VaultType,
-  TrollType,
-  TrollTypeStringEnumMap,
-  TrollStatus,
-  VaultActionType,
-  TrollManagementActionType,
-  BridgeVaultConstant,
-} from './cross-chain/index'
