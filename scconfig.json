@@ -1,0 +1,35 @@
+{
+  "name": "@staking/main",
+  "env": "mainnet",
+  "version": "0.1.0",
+  "moduleDir": "src",
+  "main": "@staking/main",
+  "modules": {
+    "@staking/assets": {
+      "path": "assets"
+    },
+    "@staking/global": {
+      "path": "global"
+    },
+    "@staking/store": {
+      "path": "store"
+    },
+    "@staking/staking-utils": {
+      "path": "staking-utils"
+    },
+    "@staking/result": {
+      "path": "result"
+    },
+    "@staking/main": {
+      "path": "main"
+    }
+  },
+  "dependencies": {
+    "@ijstech/eth-contract": "*",
+    "@openswap/sdk": "*",
+    "@openswap/chainlink-sdk": "*",
+    "@openswap/cross-chain-bridge-sdk": "*",
+    "@validapp/cross-chain-token-sdk": "*",
+    "@validapp/time-is-money-sdk": "*"
+  }
+}

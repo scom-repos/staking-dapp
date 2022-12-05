@@ -61,41 +61,4 @@ export const enum EventId {
     EmitNewToken = 'emitNewToken',
 }
 
-export interface ITokenObject {
-    address?: string;
-    name: string;
-    decimals: number;
-    symbol: string;
-    status?: boolean | null;
-    logoURI?: string;
-    isCommon?: boolean | null;
-    balance?: string | number;
-    isNative?: boolean | null;
-    isWETH?: boolean | null;
-    isNew?: boolean | null;
-};
-
-export type TokenMapType = { [token: string]: ITokenObject; };
-
-export { 
-    ApprovalStatus, 
-    IERC20ApprovalEventOptions,
-    IERC20ApprovalOptions, 
-    IERC20ApprovalAction,
-    ERC20ApprovalModel
-} from './approvalModel';
-
-export * from './utils';
-
-export {
-    isTransactionConfirmed,
-    registerSendTxEvents,
-    approveERC20Max,
-    getERC20Allowance,
-    isAddressValid,
-    getERC20Amount,
-} from './utils/common';
-
-export {
-    PageBlock,
-} from './interfaces';
+export * from './utils/index';

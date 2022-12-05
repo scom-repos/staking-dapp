@@ -1,6 +1,6 @@
 import { BigNumber } from "@ijstech/eth-wallet";
-import moment from 'moment';
-import { TokenMapType } from "..";
+import { moment } from '@ijstech/components';
+import { TokenMapType } from './common';
 
 export enum SITE_ENV {
   DEV = 'dev',

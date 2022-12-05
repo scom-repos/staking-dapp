@@ -1,6 +1,8 @@
 import { customElements, Module, ControlElement, Modal, Panel, Label, Image, Button, Container, VStack } from '@ijstech/components';
-import { getWallet, getNetworkExplorerName, viewOnExplorerByTxHash } from '@staking/store';
+import { Wallet } from '@ijstech/eth-wallet';
+import '@ijstech/eth-contract';
 import { parseContractError } from '@staking/global';
+import { getNetworkExplorerName, viewOnExplorerByTxHash } from '@staking/store';
 import styleClass from './result.css';
 import Assets from '@staking/assets';
 
@@ -74,7 +76,7 @@ export class Result extends Module {
 
   async buildLink() {
     if (this.message.txtHash) {
-      const chainId: number = await getWallet().getChainId();
+      const chainId: number = await Wallet.getInstance().getChainId();
       viewOnExplorerByTxHash(chainId, this.message.txtHash);
     }
   }
@@ -116,7 +118,7 @@ export class Result extends Module {
       };
       mainSection.appendChild(section);
     } else if (this.message.status === 'success') {
-      const chainId: number = await getWallet().getChainId();
+      const chainId: number = await Wallet.getInstance().getChainId();
       const explorerName = getNetworkExplorerName(chainId);
       
       const image = await Image.create({
