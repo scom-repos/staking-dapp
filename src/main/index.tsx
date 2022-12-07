@@ -15,8 +15,8 @@ import {
 	getAllCampaignsInfo,
 } from '@staking/staking-utils';
 import { Result } from '@staking/result';
-import { ManageStake } from './manageStake/index';
-import { PanelConfig } from './panelConfig/index';
+import { ManageStake } from '@staking/manage-stake';
+import { PanelConfig } from '@staking/panel-config';
 import { Contracts } from '@validapp/time-is-money-sdk';
 import './index.css';
 

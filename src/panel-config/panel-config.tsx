@@ -1,4 +1,4 @@
-import { Styles, Button, Container, HStack, Panel, customElements, ControlElement, Module, Icon, IEventBus, application, Label, VStack, Modal } from '@ijstech/components';
+import { Button, Container, HStack, Panel, customElements, ControlElement, Module, Icon, IEventBus, application, Label, VStack, Modal } from '@ijstech/components';
 import { Wallet } from '@ijstech/eth-wallet';
 import { downloadJsonFile, EventId, registerSendTxEvents } from '@staking/global';
 import { getChainId, getNetworkInfo, isWalletConnected, StakingCampaign, isMultiple } from '@staking/store';

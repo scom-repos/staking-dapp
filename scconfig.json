@@ -22,6 +22,15 @@
     },
     "@staking/main": {
       "path": "main"
+    },
+    "@staking/manage-stake": {
+      "path": "manage-stake"
+    },
+    "@staking/panel-config": {
+      "path": "panel-config"
+    },
+    "@staking/token-selection": {
+      "path": "token-selection"
     }
   },
   "dependencies": {

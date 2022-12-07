@@ -2,7 +2,7 @@ import { Styles, Container, Panel, customElements, ControlElement, Module, Input
 import { BigNumber } from '@ijstech/eth-wallet';
 import { DefaultDateTimeFormat, EventId, formatNumber, isAddressValid, isInvalidInput, isValidNumber, ITokenObject, limitInputNumber } from '@staking/global';
 import { getChainId, getDefaultChainId, getTokenMapData, Reward } from '@staking/store';
-import { TokenSelection } from './token-selection/index';
+import { TokenSelection } from '@staking/token-selection';
 
 declare global {
 	namespace JSX {
