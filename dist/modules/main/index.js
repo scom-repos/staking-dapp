@@ -4371,8 +4371,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
         }
     };
     StakingBlock = __decorate([
-        components_12.customModule,
-        components_12.customElements('i-section-staking')
+        components_12.customModule
     ], StakingBlock);
     exports.StakingBlock = StakingBlock;
 });

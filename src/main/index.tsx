@@ -1,4 +1,4 @@
-import { Styles, moment, Module, Panel, Icon, Button, Label, VStack, HStack, Container, customElements, ControlElement, IEventBus, application, customModule, Modal, Input } from '@ijstech/components';
+import { Styles, moment, Module, Panel, Icon, Button, Label, VStack, HStack, Container, ControlElement, IEventBus, application, customModule, Modal, Input } from '@ijstech/components';
 import { BigNumber, Wallet, WalletPlugin } from '@ijstech/eth-wallet';
 import '@ijstech/eth-contract';
 import Assets from '@staking/assets';
@@ -22,16 +22,7 @@ import './index.css';
 
 Styles.Theme.applyTheme(Styles.Theme.darkTheme);
 
-declare global {
-	namespace JSX {
-		interface IntrinsicElements {
-			['i-section-staking']: StakingBlock
-		}
-	}
-}
-
 @customModule
-@customElements('i-section-staking')
 export class StakingBlock extends Module implements PageBlock {
 	private data: any;
 	readonly onEdit: () => Promise<void>;
