@@ -726,7 +726,7 @@ define("@staking/panel-config/reward.tsx", ["require", "exports", "@ijstech/comp
         }
     };
     RewardConfig = __decorate([
-        components_2.customElements('reward-config')
+        components_2.customElements('staking-reward-config')
     ], RewardConfig);
     exports.RewardConfig = RewardConfig;
 });
@@ -1666,7 +1666,7 @@ define("@staking/panel-config/campaign.tsx", ["require", "exports", "@ijstech/co
         }
     };
     CampaignConfig = __decorate([
-        components_4.customElements('campaign-config')
+        components_4.customElements('staking-campaign-config')
     ], CampaignConfig);
     exports.CampaignConfig = CampaignConfig;
 });
@@ -2040,7 +2040,7 @@ define("@staking/panel-config/panel-config.tsx", ["require", "exports", "@ijstec
         }
     };
     PanelConfig = __decorate([
-        components_5.customElements('panel-config')
+        components_5.customElements('staking-panel-config')
     ], PanelConfig);
     exports.PanelConfig = PanelConfig;
 });

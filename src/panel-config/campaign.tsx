@@ -7,12 +7,12 @@ import { StakingConfig } from './staking';
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			['campaign-config']: ControlElement;
+			['staking-campaign-config']: ControlElement;
 		}
 	}
 };
 
-@customElements('campaign-config')
+@customElements('staking-campaign-config')
 export class CampaignConfig extends Module {
 	private networkSelection: Panel;
 	private btnNetwork: Button;

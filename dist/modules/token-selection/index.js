@@ -392,7 +392,7 @@ define("@staking/token-selection/importToken.tsx", ["require", "exports", "@ijst
         components_2.observable()
     ], ImportToken.prototype, "_state", void 0);
     ImportToken = __decorate([
-        components_2.customElements('import-token')
+        components_2.customElements('staking-import-token')
     ], ImportToken);
     exports.ImportToken = ImportToken;
 });
@@ -818,7 +818,7 @@ define("@staking/token-selection/tokenSelection.tsx", ["require", "exports", "@i
                             this.$render("i-icon", { id: "iconSortUp", class: "icon-sort-up", name: "sort-up" }),
                             this.$render("i-icon", { id: "iconSortDown", class: "icon-sort-down", name: "sort-down" }))),
                     this.$render("i-grid-layout", { id: "tokenList", class: "token-list", columnsPerRow: 1 })),
-                this.$render("import-token", { id: "importTokenModal" })));
+                this.$render("staking-import-token", { id: "importTokenModal" })));
         }
     };
     __decorate([
@@ -828,7 +828,7 @@ define("@staking/token-selection/tokenSelection.tsx", ["require", "exports", "@i
         components_3.observable()
     ], TokenSelection.prototype, "filterValue", void 0);
     TokenSelection = __decorate([
-        components_3.customElements('token-selection')
+        components_3.customElements('staking-token-selection')
     ], TokenSelection);
     exports.TokenSelection = TokenSelection;
     ;

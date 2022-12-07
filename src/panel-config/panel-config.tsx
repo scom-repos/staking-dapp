@@ -10,12 +10,12 @@ import { Result } from '@staking/result';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      ['panel-config']: ControlElement;
+      ['staking-panel-config']: ControlElement;
     }
   }
 };
 
-@customElements('panel-config')
+@customElements('staking-panel-config')
 export class PanelConfig extends Module {
   private backElm: HStack;
   private configCampaignsElm: Panel;

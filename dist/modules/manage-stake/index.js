@@ -375,7 +375,7 @@ define("@staking/manage-stake/manage-stake.tsx", ["require", "exports", "@ijstec
         }
     };
     ManageStake = __decorate([
-        components_2.customElements('manage-stake')
+        components_2.customElements('staking-manage-stake')
     ], ManageStake);
     exports.ManageStake = ManageStake;
 });

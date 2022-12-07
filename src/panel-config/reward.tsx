@@ -7,12 +7,12 @@ import { TokenSelection } from '@staking/token-selection';
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			['reward-config']: ControlElement;
+			['staking-reward-config']: ControlElement;
 		}
 	}
 };
 
-@customElements('reward-config')
+@customElements('staking-reward-config')
 export class RewardConfig extends Module {
 	private pnlTokenSelection: Panel;
 	private tokenSelection: TokenSelection;

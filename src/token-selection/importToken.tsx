@@ -18,12 +18,12 @@ import { addUserTokens, setTokenBalances, setTokenMap, viewOnExplorerByAddress }
 declare global {
 	namespace JSX {
 		interface IntrinsicElements {
-			['import-token']: ControlElement;
+			['staking-import-token']: ControlElement;
 		}
 	}
 };
 
-@customElements('import-token')
+@customElements('staking-import-token')
 export class ImportToken extends Module {
   private importModal: Modal;
   private importBtn: Button;
