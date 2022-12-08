@@ -25,12 +25,12 @@ enum CurrentMode {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      ['manage-stake']: ControlElement;
+      ['staking-manage-stake']: ControlElement;
     }
   }
 };
 
-@customElements('manage-stake')
+@customElements('staking-manage-stake')
 export class ManageStake extends Module {
   private stakingInfo: any = {};
   private address: string;
