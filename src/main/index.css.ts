@@ -2,8 +2,6 @@ import { Styles } from '@ijstech/components';
 import Assets from '@staking/assets';
 import { maxWidth, maxHeight } from '@staking/store';
 
-Styles.Theme.darkTheme.background.default = '#0c1234';
-
 const colorVar = {
   primaryButton: 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box',
   primaryGradient: 'linear-gradient(255deg,#f15e61,#b52082)',

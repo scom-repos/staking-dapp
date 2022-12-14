@@ -1,4 +1,4 @@
-import { Styles, moment, Module, Panel, Icon, Button, Label, VStack, HStack, Container, ControlElement, IEventBus, application, customModule, Modal, Input } from '@ijstech/components';
+import { moment, Module, Panel, Icon, Button, Label, VStack, HStack, Container, ControlElement, IEventBus, application, customModule, Modal, Input } from '@ijstech/components';
 import { BigNumber, Wallet, WalletPlugin } from '@ijstech/eth-wallet';
 import '@ijstech/eth-contract';
 import Assets from '@staking/assets';
@@ -19,8 +19,6 @@ import { ManageStake } from '@staking/manage-stake';
 import { PanelConfig } from '@staking/panel-config';
 import { Contracts } from '@validapp/time-is-money-sdk';
 import './index.css';
-
-Styles.Theme.applyTheme(Styles.Theme.darkTheme);
 
 @customModule
 export class StakingBlock extends Module implements PageBlock {
