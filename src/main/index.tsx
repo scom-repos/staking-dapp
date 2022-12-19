@@ -889,7 +889,7 @@ export class StakingBlock extends Module implements PageBlock {
 
 			nodeItems.push(containerSection);
 			containerSection.appendChild(
-				<i-hstack background={{ color: colorCampaignBackground }} width="100%" maxWidth={maxWidth} height={maxHeight}>
+				<i-hstack background={{ color: colorCampaignBackground }} width="100%" class="container" height={maxHeight}>
 					{ stakingsElm }
 				</i-hstack>
 			)
@@ -901,7 +901,7 @@ export class StakingBlock extends Module implements PageBlock {
 	render() {
 		return (
 			<i-panel id="stakingComponent" class="staking-component" minHeight={200}>
-				<i-panel id="stakingLayout" class="staking-layout" width={maxWidth} height={maxHeight}>
+				<i-panel id="stakingLayout" class="staking-layout container" height={maxHeight}>
 					<i-vstack id="loadingElm" class="i-loading-overlay">
 						<i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
 							<i-icon
@@ -914,7 +914,7 @@ export class StakingBlock extends Module implements PageBlock {
 							/>
 						</i-vstack>
 					</i-vstack>
-					<i-panel id="stakingElm" class="wrapper" />
+					<i-panel id="stakingElm" class="wrapper container" />
 				</i-panel>
 				<i-panel id="manageStakeElm" />
 			</i-panel>

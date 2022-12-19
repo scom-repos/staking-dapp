@@ -7,6 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define("@staking/main/index.css.ts", ["require", "exports", "@ijstech/components", "@staking/assets", "@staking/store"], function (require, exports, components_1, assets_1, store_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    const Theme = components_1.Styles.Theme.ThemeVars;
     const colorVar = {
         primaryButton: 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box',
         primaryGradient: 'linear-gradient(255deg,#f15e61,#b52082)',
@@ -295,6 +296,13 @@ define("@staking/main/index.css.ts", ["require", "exports", "@ijstech/components
                         fill: '#f15e61',
                     }
                 },
+            },
+            'i-panel.container': {
+                width: Theme.layout.container.width,
+                maxWidth: Theme.layout.container.maxWidth,
+                overflow: Theme.layout.container.overflow,
+                textAlign: Theme.layout.container.textAlign,
+                margin: '0 auto'
             },
             '.ml-auto': {
                 marginLeft: 'auto',
@@ -1021,7 +1029,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
                         return stakingElms[optionIdx];
                     }));
                     nodeItems.push(containerSection);
-                    containerSection.appendChild(this.$render("i-hstack", { background: { color: colorCampaignBackground }, width: "100%", maxWidth: store_2.maxWidth, height: store_2.maxHeight }, stakingsElm));
+                    containerSection.appendChild(this.$render("i-hstack", { background: { color: colorCampaignBackground }, width: "100%", class: "container", height: store_2.maxHeight }, stakingsElm));
                 }
                 ;
                 this.stakingElm.clearInnerHTML();
@@ -1096,12 +1104,12 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
         }
         render() {
             return (this.$render("i-panel", { id: "stakingComponent", class: "staking-component", minHeight: 200 },
-                this.$render("i-panel", { id: "stakingLayout", class: "staking-layout", width: store_2.maxWidth, height: store_2.maxHeight },
+                this.$render("i-panel", { id: "stakingLayout", class: "staking-layout container", height: store_2.maxHeight },
                     this.$render("i-vstack", { id: "loadingElm", class: "i-loading-overlay" },
                         this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
                             this.$render("i-icon", { class: "i-loading-spinner_icon", image: { url: assets_2.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
                             this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
-                    this.$render("i-panel", { id: "stakingElm", class: "wrapper" })),
+                    this.$render("i-panel", { id: "stakingElm", class: "wrapper container" })),
                 this.$render("i-panel", { id: "manageStakeElm" })));
         }
     };
