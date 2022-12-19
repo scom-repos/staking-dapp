@@ -471,6 +471,7 @@ export class StakingBlock extends Module implements PageBlock {
 			const colorTimeBackground = isThemeApplied ? campaign.customColorTimeBackground || '#F15E61' : '#F15E61';
 			const containerSection = await Panel.create();
 			containerSection.id = `campaign-${idx}`;
+			containerSection.classList.add('container');
 			const options = campaign.options;
 			for (let optIdx = 0; optIdx < options.length; optIdx++) {
 				const opt = options[optIdx];
@@ -889,7 +890,7 @@ export class StakingBlock extends Module implements PageBlock {
 
 			nodeItems.push(containerSection);
 			containerSection.appendChild(
-				<i-hstack background={{ color: colorCampaignBackground }} width="100%" maxWidth={maxWidth} height={maxHeight}>
+				<i-hstack background={{ color: colorCampaignBackground }} width="100%" class="container" height={maxHeight}>
 					{ stakingsElm }
 				</i-hstack>
 			)

@@ -1,6 +1,7 @@
 import { Styles } from '@ijstech/components';
 import Assets from '@staking/assets';
 import { maxWidth, maxHeight } from '@staking/store';
+const Theme = Styles.Theme.ThemeVars;
 
 const colorVar = {
   primaryButton: 'transparent linear-gradient(90deg, #AC1D78 0%, #E04862 100%) 0% 0% no-repeat padding-box',
@@ -302,6 +303,13 @@ Styles.cssRule('.staking-component', {
           fill: '#f15e61',
         }
       },
+    },
+    'i-panel.container': {
+      width: Theme.layout.container.width,
+      maxWidth: Theme.layout.container.maxWidth,
+      overflow: Theme.layout.container.overflow,
+      textAlign: (Theme.layout.container.textAlign as any),
+      margin: '0 auto'
     },
     '.ml-auto': {
       marginLeft: 'auto',
