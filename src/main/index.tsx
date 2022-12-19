@@ -471,6 +471,7 @@ export class StakingBlock extends Module implements PageBlock {
 			const colorTimeBackground = isThemeApplied ? campaign.customColorTimeBackground || '#F15E61' : '#F15E61';
 			const containerSection = await Panel.create();
 			containerSection.id = `campaign-${idx}`;
+			containerSection.classList.add('container');
 			const options = campaign.options;
 			for (let optIdx = 0; optIdx < options.length; optIdx++) {
 				const opt = options[optIdx];
@@ -914,7 +915,7 @@ export class StakingBlock extends Module implements PageBlock {
 							/>
 						</i-vstack>
 					</i-vstack>
-					<i-panel id="stakingElm" class="wrapper container" />
+					<i-panel id="stakingElm" class="wrapper" />
 				</i-panel>
 				<i-panel id="manageStakeElm" />
 			</i-panel>

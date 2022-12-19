@@ -693,6 +693,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
                     const colorTimeBackground = store_2.isThemeApplied ? campaign.customColorTimeBackground || '#F15E61' : '#F15E61';
                     const containerSection = await components_2.Panel.create();
                     containerSection.id = `campaign-${idx}`;
+                    containerSection.classList.add('container');
                     const options = campaign.options;
                     for (let optIdx = 0; optIdx < options.length; optIdx++) {
                         const opt = options[optIdx];
@@ -1109,7 +1110,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
                         this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
                             this.$render("i-icon", { class: "i-loading-spinner_icon", image: { url: assets_2.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),
                             this.$render("i-label", { caption: "Loading...", font: { color: '#FD4A4C', size: '1.5em' }, class: "i-loading-spinner_text" }))),
-                    this.$render("i-panel", { id: "stakingElm", class: "wrapper container" })),
+                    this.$render("i-panel", { id: "stakingElm", class: "wrapper" })),
                 this.$render("i-panel", { id: "manageStakeElm" })));
         }
     };
