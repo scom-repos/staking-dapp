@@ -1104,7 +1104,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
         }
         render() {
             return (this.$render("i-panel", { id: "stakingComponent", class: "staking-component", minHeight: 200 },
-                this.$render("i-panel", { id: "stakingLayout", class: "staking-layout container", height: store_2.maxHeight },
+                this.$render("i-panel", { id: "stakingLayout", class: "staking-layout", width: store_2.maxWidth, height: store_2.maxHeight },
                     this.$render("i-vstack", { id: "loadingElm", class: "i-loading-overlay" },
                         this.$render("i-vstack", { class: "i-loading-spinner", horizontalAlignment: "center", verticalAlignment: "center" },
                             this.$render("i-icon", { class: "i-loading-spinner_icon", image: { url: assets_2.default.fullPath('img/loading.svg'), width: 36, height: 36 } }),

@@ -901,7 +901,7 @@ export class StakingBlock extends Module implements PageBlock {
 	render() {
 		return (
 			<i-panel id="stakingComponent" class="staking-component" minHeight={200}>
-				<i-panel id="stakingLayout" class="staking-layout container" height={maxHeight}>
+				<i-panel id="stakingLayout" class="staking-layout" width={maxWidth} height={maxHeight}>
 					<i-vstack id="loadingElm" class="i-loading-overlay">
 						<i-vstack class="i-loading-spinner" horizontalAlignment="center" verticalAlignment="center">
 							<i-icon
