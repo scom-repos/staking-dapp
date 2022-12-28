@@ -1,7 +1,7 @@
 import { moment } from "@ijstech/components";
 import { Wallet, BigNumber, Utils, Erc20 } from "@ijstech/eth-wallet";
-import { Contracts as TimeIsMoneyContracts } from '@validapp/time-is-money-sdk';
-import { Contracts } from "@openswap/sdk";
+import { Contracts as TimeIsMoneyContracts } from '@scom/oswap-time-is-money-contract';
+import { Contracts } from "@scom/oswap-openswap-contract";
 import { Contracts as UtilsContracts } from "@openswap/chainlink-sdk";
 import { Contracts as CrossChainContracts } from "@openswap/cross-chain-bridge-sdk";
 import { 
@@ -196,10 +196,12 @@ const getDefaultStakingByAddress = async (option: Staking) => {
               rewardsContract = new TimeIsMoneyContracts.Rewards(wallet, reward.address);
             }
             admin = await rewardsContract.admin();
-            let multiplierWei = await rewardsContract.multiplier();
-            multiplier = Utils.fromDecimals(multiplierWei).toFixed();
-            initialReward = Utils.fromDecimals(await rewardsContract.initialReward()).toFixed();
             rewardTokenAddress = await rewardsContract.token();
+            let rewardToken = new Erc20(wallet, rewardTokenAddress);
+            let rewardTokenDecimals = await rewardToken.decimals;
+            let multiplierWei = await rewardsContract.multiplier();
+            multiplier = Utils.fromDecimals(multiplierWei, rewardTokenDecimals).toFixed();
+            initialReward = Utils.fromDecimals(await rewardsContract.initialReward(), rewardTokenDecimals).toFixed();
             vestingPeriod = (await rewardsContract.vestingPeriod()).toNumber();
             claimDeadline = (await rewardsContract.claimDeadline()).toNumber();
             if (reward.isCommonStartDate) {

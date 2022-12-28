@@ -340,6 +340,9 @@ define("@staking/main/index.css.ts", ["require", "exports", "@ijstech/components
                     }
                 }
             },
+            'i-modal .modal': {
+                background: '#192046',
+            },
             '#loadingElm.i-loading--active': {
                 marginTop: '2rem',
                 position: 'initial',
@@ -360,7 +363,7 @@ define("@staking/main/index.css.ts", ["require", "exports", "@ijstech/components
         }
     });
 });
-define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@staking/assets", "@staking/global", "@staking/store", "@staking/staking-utils", "@staking/result", "@staking/manage-stake", "@staking/panel-config", "@validapp/time-is-money-sdk", "@ijstech/eth-contract", "@staking/main/index.css.ts"], function (require, exports, components_2, eth_wallet_1, assets_2, global_1, store_2, staking_utils_1, result_1, manage_stake_1, panel_config_1, time_is_money_sdk_1) {
+define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@staking/assets", "@staking/global", "@staking/store", "@staking/staking-utils", "@staking/result", "@staking/manage-stake", "@staking/panel-config", "@scom/oswap-time-is-money-contract", "@ijstech/eth-contract", "@staking/main/index.css.ts"], function (require, exports, components_2, eth_wallet_1, assets_2, global_1, store_2, staking_utils_1, result_1, manage_stake_1, panel_config_1, oswap_time_is_money_contract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.StakingBlock = void 0;
@@ -462,7 +465,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
                         const infoList = this.data[wallet.chainId];
                         const stakingAddress = infoList && ((_a = infoList[0].stakings[0]) === null || _a === void 0 ? void 0 : _a.address);
                         if (stakingAddress) {
-                            const timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, stakingAddress);
+                            const timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, stakingAddress);
                             await timeIsMoney.getCredit(wallet.address);
                         }
                         return true;
@@ -950,7 +953,7 @@ define("@staking/main", ["require", "exports", "@ijstech/components", "@ijstech/
                         const pathsLength = _lockedTokenIconPaths.length;
                         const rewardToken = this.getRewardToken(rewardsData[0].rewardTokenAddress);
                         const rewardIconPath = store_2.getTokenIconPath(rewardToken, chainId);
-                        stakingElms[optionIdx].appendChild(this.$render("i-vstack", { gap: 16, width: store_2.maxWidth, height: "100%", padding: { top: 10, bottom: 10, left: 20, right: 20 }, position: "relative" },
+                        stakingElms[optionIdx].appendChild(this.$render("i-vstack", { gap: 15, width: store_2.maxWidth, height: "100%", padding: { top: 10, bottom: 10, left: 20, right: 20 }, position: "relative" },
                             stickerSections[optionIdx],
                             this.$render("i-hstack", { gap: 10, width: "100%", verticalAlignment: "center" },
                                 this.$render("i-hstack", { gap: 10, width: "50%" },
