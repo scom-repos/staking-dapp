@@ -1,4 +1,4 @@
-define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@validapp/time-is-money-sdk", "@openswap/sdk", "@openswap/chainlink-sdk", "@openswap/cross-chain-bridge-sdk", "@staking/global", "@staking/store"], function (require, exports, components_1, eth_wallet_1, time_is_money_sdk_1, sdk_1, chainlink_sdk_1, cross_chain_bridge_sdk_1, global_1, store_1) {
+define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "@ijstech/eth-wallet", "@scom/oswap-time-is-money-contract", "@scom/oswap-openswap-contract", "@openswap/chainlink-sdk", "@openswap/cross-chain-bridge-sdk", "@staking/global", "@staking/store"], function (require, exports, components_1, eth_wallet_1, oswap_time_is_money_contract_1, oswap_openswap_contract_1, chainlink_sdk_1, cross_chain_bridge_sdk_1, global_1, store_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.deployCampaign = exports.getApprovalModelAction = exports.lockToken = exports.claimToken = exports.withdrawToken = exports.getVaultRewardCurrentAPR = exports.getLPRewardCurrentAPR = exports.getERC20RewardCurrentAPR = exports.getVaultBalance = exports.getVaultObject = exports.getLPBalance = exports.getLPObject = exports.getStakingTotalLocked = exports.getAllCampaignsInfo = exports.getTokenPrice = void 0;
@@ -18,7 +18,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
         let referencePair = store_1.tokenPriceAMMReference[chainId][token.toLowerCase()];
         if (!referencePair)
             return null;
-        let pair = new sdk_1.Contracts.OSWAP_Pair(wallet, referencePair);
+        let pair = new oswap_openswap_contract_1.Contracts.OSWAP_Pair(wallet, referencePair);
         let token0 = await pair.token0();
         let token1 = await pair.token1();
         let reserves = await pair.getReserves();
@@ -86,10 +86,10 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             let wallet = eth_wallet_1.Wallet.getInstance();
             let rewardsContract;
             if (isCommonStartDate) {
-                rewardsContract = new time_is_money_sdk_1.Contracts.RewardsCommonStartDate(wallet, rewardAddress);
+                rewardsContract = new oswap_time_is_money_contract_1.Contracts.RewardsCommonStartDate(wallet, rewardAddress);
             }
             else {
-                rewardsContract = new time_is_money_sdk_1.Contracts.Rewards(wallet, rewardAddress);
+                rewardsContract = new oswap_time_is_money_contract_1.Contracts.Rewards(wallet, rewardAddress);
             }
             try {
                 admin = await rewardsContract.admin();
@@ -104,7 +104,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             }
             let vestingPeriod = (await rewardsContract.vestingPeriod()).toNumber();
             let vestingStart;
-            if (rewardsContract instanceof time_is_money_sdk_1.Contracts.RewardsCommonStartDate) {
+            if (rewardsContract instanceof oswap_time_is_money_contract_1.Contracts.RewardsCommonStartDate) {
                 let vestingStartDateRaw = (await rewardsContract.vestingStartDate()).toNumber();
                 vestingStart = components_1.moment.unix(vestingStartDateRaw);
             }
@@ -136,7 +136,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             let stakingAddress = option.address;
             let rewards = option.rewards;
             let hasRewardAddress = rewards.length && rewards[0].address;
-            let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, stakingAddress);
+            let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, stakingAddress);
             let minimumLockTime = await timeIsMoney.minimumLockTime();
             let maximumTotalLock = await timeIsMoney.maximumTotalLock();
             let startOfEntryPeriod = '0';
@@ -165,16 +165,18 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
                         let rewardsContract, admin, multiplier, initialReward, rewardTokenAddress, vestingPeriod, vestingStartDate, claimDeadline;
                         try {
                             if (reward.isCommonStartDate) {
-                                rewardsContract = new time_is_money_sdk_1.Contracts.RewardsCommonStartDate(wallet, reward.address);
+                                rewardsContract = new oswap_time_is_money_contract_1.Contracts.RewardsCommonStartDate(wallet, reward.address);
                             }
                             else {
-                                rewardsContract = new time_is_money_sdk_1.Contracts.Rewards(wallet, reward.address);
+                                rewardsContract = new oswap_time_is_money_contract_1.Contracts.Rewards(wallet, reward.address);
                             }
                             admin = await rewardsContract.admin();
-                            let multiplierWei = await rewardsContract.multiplier();
-                            multiplier = eth_wallet_1.Utils.fromDecimals(multiplierWei).toFixed();
-                            initialReward = eth_wallet_1.Utils.fromDecimals(await rewardsContract.initialReward()).toFixed();
                             rewardTokenAddress = await rewardsContract.token();
+                            let rewardToken = new eth_wallet_1.Erc20(wallet, rewardTokenAddress);
+                            let rewardTokenDecimals = await rewardToken.decimals;
+                            let multiplierWei = await rewardsContract.multiplier();
+                            multiplier = eth_wallet_1.Utils.fromDecimals(multiplierWei, rewardTokenDecimals).toFixed();
+                            initialReward = eth_wallet_1.Utils.fromDecimals(await rewardsContract.initialReward(), rewardTokenDecimals).toFixed();
                             vestingPeriod = (await rewardsContract.vestingPeriod()).toNumber();
                             claimDeadline = (await rewardsContract.claimDeadline()).toNumber();
                             if (reward.isCommonStartDate) {
@@ -214,7 +216,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             let rewardOptions = option.rewards;
             let currentAddress = wallet.address;
             let hasRewardAddress = rewardOptions.length > 0 && rewardOptions[0].address;
-            let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, stakingAddress);
+            let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, stakingAddress);
             let totalCreditWei = await timeIsMoney.getCredit(currentAddress);
             let lockAmountWei = await timeIsMoney.lockAmount(currentAddress);
             let withdrawn = await timeIsMoney.withdrawn(currentAddress);
@@ -284,10 +286,10 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
                             else {
                                 let rewardsContract;
                                 if (option.isCommonStartDate) {
-                                    rewardsContract = new time_is_money_sdk_1.Contracts.RewardsCommonStartDate(wallet, option.address);
+                                    rewardsContract = new oswap_time_is_money_contract_1.Contracts.RewardsCommonStartDate(wallet, option.address);
                                 }
                                 else {
-                                    rewardsContract = new time_is_money_sdk_1.Contracts.Rewards(wallet, option.address);
+                                    rewardsContract = new oswap_time_is_money_contract_1.Contracts.Rewards(wallet, option.address);
                                 }
                                 let admin = await rewardsContract.admin();
                                 let multiplierWei = await rewardsContract.multiplier();
@@ -376,7 +378,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
     exports.getAllCampaignsInfo = getAllCampaignsInfo;
     const getStakingTotalLocked = async (stakingAddress) => {
         let wallet = eth_wallet_1.Wallet.getInstance();
-        let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, stakingAddress);
+        let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, stakingAddress);
         let totalLockedWei = await timeIsMoney.totalLocked();
         let totalLocked = eth_wallet_1.Utils.fromDecimals(totalLockedWei).toFixed();
         return totalLocked;
@@ -390,7 +392,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
         try {
             let wallet = eth_wallet_1.Wallet.getInstance();
             const WETH = getWETH(wallet);
-            let pair = new sdk_1.Contracts.OSWAP_Pair(wallet, pairAddress);
+            let pair = new oswap_openswap_contract_1.Contracts.OSWAP_Pair(wallet, pairAddress);
             let getSymbol = await pair.symbol();
             let getName = await pair.name();
             let getDecimal = await pair.decimals();
@@ -412,7 +414,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
     exports.getLPObject = getLPObject;
     const getLPBalance = async (pairAddress) => {
         let wallet = eth_wallet_1.Wallet.getInstance();
-        let pair = new sdk_1.Contracts.OSWAP_Pair(wallet, pairAddress);
+        let pair = new oswap_openswap_contract_1.Contracts.OSWAP_Pair(wallet, pairAddress);
         let balance = await pair.balanceOf(wallet.address);
         return eth_wallet_1.Utils.fromDecimals(balance).toFixed();
     };
@@ -464,7 +466,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
     const getReservesByPair = async (pairAddress, tokenInAddress, tokenOutAddress) => {
         let wallet = eth_wallet_1.Wallet.getInstance();
         let reserveObj;
-        let pair = new sdk_1.Contracts.OSWAP_Pair(wallet, pairAddress);
+        let pair = new oswap_openswap_contract_1.Contracts.OSWAP_Pair(wallet, pairAddress);
         let reserves = await pair.getReserves();
         if (!tokenInAddress || !tokenOutAddress) {
             tokenInAddress = await pair.token0();
@@ -574,7 +576,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             return;
         try {
             let wallet = eth_wallet_1.Wallet.getInstance();
-            let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, contractAddress);
+            let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, contractAddress);
             let receipt = await timeIsMoney.withdraw(true);
             return receipt;
         }
@@ -590,7 +592,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             return;
         try {
             let wallet = eth_wallet_1.Wallet.getInstance();
-            let rewards = new time_is_money_sdk_1.Contracts.Rewards(wallet, contractAddress);
+            let rewards = new oswap_time_is_money_contract_1.Contracts.Rewards(wallet, contractAddress);
             let receipt = await rewards.claim();
             return receipt;
         }
@@ -609,7 +611,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
         let wallet = eth_wallet_1.Wallet.getInstance();
         let decimals = typeof token.decimals === 'object' ? token.decimals.toNumber() : token.decimals;
         let tokenAmount = eth_wallet_1.Utils.toDecimals(amount, decimals);
-        let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet, contractAddress);
+        let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet, contractAddress);
         let receipt = await timeIsMoney.lock(tokenAmount);
         return receipt;
     };
@@ -627,7 +629,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
         let result = Object.assign(Object.assign({}, campaign), { stakings: [] });
         try {
             for (const staking of campaign.stakings) {
-                let timeIsMoney = new time_is_money_sdk_1.Contracts.TimeIsMoney(wallet);
+                let timeIsMoney = new oswap_time_is_money_contract_1.Contracts.TimeIsMoney(wallet);
                 let stakingResult;
                 const { campaignStart, campaignEnd, admin } = campaign;
                 const { lockTokenAddress, maxTotalLock, minLockTime, perAddressCap } = staking;
@@ -657,11 +659,11 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
                     };
                     let rewardsContract;
                     if (isCommonStartDate) {
-                        rewardsContract = new time_is_money_sdk_1.Contracts.RewardsCommonStartDate(wallet);
+                        rewardsContract = new oswap_time_is_money_contract_1.Contracts.RewardsCommonStartDate(wallet);
                         params = Object.assign(Object.assign({}, params), { vestingStartDate });
                     }
                     else {
-                        rewardsContract = new time_is_money_sdk_1.Contracts.Rewards(wallet);
+                        rewardsContract = new oswap_time_is_money_contract_1.Contracts.Rewards(wallet);
                     }
                     const rewardAddress = await rewardsContract.deploy(params);
                     rewardResult.push(Object.assign(Object.assign({}, reward), { address: rewardAddress }));
@@ -686,7 +688,7 @@ define("@staking/staking-utils", ["require", "exports", "@ijstech/components", "
             // Transfer max reward from the admin to the reward contract.
             for (const transferReward of listTransferReward) {
                 const { to, value, rewardTokenAddress } = transferReward;
-                const contract = new sdk_1.Contracts.OSWAP_ERC20(wallet, rewardTokenAddress);
+                const contract = new oswap_openswap_contract_1.Contracts.OSWAP_ERC20(wallet, rewardTokenAddress);
                 await contract.transfer({ to, value });
             }
         }

@@ -35,10 +35,9 @@
   },
   "dependencies": {
     "@ijstech/eth-contract": "*",
-    "@openswap/sdk": "*",
+    "@scom/oswap-openswap-contract": "*",
     "@openswap/chainlink-sdk": "*",
     "@openswap/cross-chain-bridge-sdk": "*",
-    "@validapp/cross-chain-token-sdk": "*",
-    "@validapp/time-is-money-sdk": "*"
+    "@scom/oswap-time-is-money-contract": "*"
   }
 }

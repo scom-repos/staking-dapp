@@ -3112,7 +3112,7 @@ define("@staking/store/data/index.ts", ["require", "exports", "@staking/store/da
     Object.defineProperty(exports, "LockTokenTypeList", { enumerable: true, get: function () { return index_6.LockTokenTypeList; } });
     Object.defineProperty(exports, "USDPeggedTokenAddressMap", { enumerable: true, get: function () { return index_6.USDPeggedTokenAddressMap; } });
 });
-define("@staking/store", ["require", "exports", "@ijstech/eth-wallet", "@ijstech/components", "@staking/global", "@openswap/sdk", "@staking/assets", "@staking/store/data/index.ts", "@staking/store/data/index.ts"], function (require, exports, eth_wallet_1, components_1, global_1, sdk_1, assets_1, index_7, index_8) {
+define("@staking/store", ["require", "exports", "@ijstech/eth-wallet", "@ijstech/components", "@staking/global", "@scom/oswap-openswap-contract", "@staking/assets", "@staking/store/data/index.ts", "@staking/store/data/index.ts"], function (require, exports, eth_wallet_1, components_1, global_1, oswap_openswap_contract_1, assets_1, index_7, index_8) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.maxHeight = exports.maxWidth = exports.isMultiple = exports.isThemeApplied = exports.getTokenUrl = exports.baseUrl = exports.getLockedTokenIconPaths = exports.getLockedTokenSymbol = exports.getLockedTokenObject = exports.hasMetaMask = exports.hasWallet = exports.logoutWallet = exports.switchNetwork = exports.connectWallet = exports.isWalletConnected = exports.getWalletOptions = exports.walletList = exports.getStakingStatus = exports.setStakingStatus = exports.viewOnExplorerByAddress = exports.viewOnExplorerByTxHash = exports.hasUserToken = exports.setUserTokens = exports.tokenSymbol = exports.getTokenIcon = exports.getTokenDecimals = exports.getTokensDataList = exports.getTokenMap = exports.setTokenMap = exports.getTokenMapData = exports.getTokenObject = exports.projectNativeTokenSymbol = exports.projectNativeToken = exports.getNetworkImg = exports.getNetworkExplorerName = exports.getSiteSupportedNetworks = exports.getMatchNetworks = exports.getFilteredNetworks = exports.getNetworkInfo = exports.getInfuraId = exports.getDefaultChainId = exports.setDataFromSCConfig = exports.state = exports.setTokenBalances = exports.getTokenBalance = exports.getTokenBalances = exports.updateAllTokenBalances = exports.getTokenList = exports.toggleExpertMode = exports.isExpertMode = exports.getErc20 = exports.getWalletProvider = exports.getWallet = exports.getChainId = exports.getWETH = exports.getChainNativeToken = exports.getAddresses = exports.getCurrentChainId = exports.setCurrentChainId = exports.getSiteEnv = exports.setSiteEnv = exports.addUserTokens = exports.getUserTokens = exports.nullAddress = exports.fallBackUrl = void 0;
@@ -3392,7 +3392,7 @@ define("@staking/store", ["require", "exports", "@ijstech/eth-wallet", "@ijstech
     };
     exports.projectNativeTokenSymbol = projectNativeTokenSymbol;
     const getTokenObject = async (address, showBalance) => {
-        const ERC20Contract = new sdk_1.Contracts.ERC20(eth_wallet_1.Wallet.getInstance(), address);
+        const ERC20Contract = new oswap_openswap_contract_1.Contracts.ERC20(eth_wallet_1.Wallet.getInstance(), address);
         const symbol = await ERC20Contract.symbol();
         const name = await ERC20Contract.name();
         const decimals = (await ERC20Contract.decimals()).toFixed();

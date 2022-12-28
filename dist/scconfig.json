@@ -13,7 +13,7 @@
             "path": "global",
             "dependencies": [
                 "@ijstech/eth-wallet",
-                "@openswap/sdk"
+                "@scom/oswap-openswap-contract"
             ]
         },
         "@staking/store": {
@@ -21,7 +21,7 @@
             "dependencies": [
                 "@ijstech/eth-wallet",
                 "@staking/global",
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/assets"
             ]
         },
@@ -29,8 +29,8 @@
             "path": "staking-utils",
             "dependencies": [
                 "@ijstech/eth-wallet",
-                "@validapp/time-is-money-sdk",
-                "@openswap/sdk",
+                "@scom/oswap-time-is-money-contract",
+                "@scom/oswap-openswap-contract",
                 "@openswap/chainlink-sdk",
                 "@openswap/cross-chain-bridge-sdk",
                 "@staking/global",
@@ -43,7 +43,7 @@
             "dependencies": [
                 "@ijstech/eth-wallet",
                 "@ijstech/eth-contract",
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/global",
                 "@staking/store",
                 "@staking/assets"
@@ -55,7 +55,7 @@
                 "@ijstech/eth-wallet",
                 "@ijstech/eth-contract",
                 "@staking/assets",
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/global",
                 "@staking/store",
                 "@openswap/cross-chain-bridge-sdk",
@@ -65,14 +65,14 @@
                 "@staking/manage-stake",
                 "@staking/token-selection",
                 "@staking/panel-config",
-                "@validapp/time-is-money-sdk"
+                "@scom/oswap-time-is-money-contract"
             ]
         },
         "@staking/manage-stake": {
             "path": "manage-stake",
             "dependencies": [
                 "@ijstech/eth-wallet",
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/global",
                 "@staking/assets",
                 "@staking/store",
@@ -80,7 +80,7 @@
                 "@staking/result",
                 "@openswap/cross-chain-bridge-sdk",
                 "@openswap/chainlink-sdk",
-                "@validapp/time-is-money-sdk",
+                "@scom/oswap-time-is-money-contract",
                 "@staking/staking-utils"
             ]
         },
@@ -88,14 +88,14 @@
             "path": "panel-config",
             "dependencies": [
                 "@ijstech/eth-wallet",
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/global",
                 "@staking/assets",
                 "@staking/store",
                 "@staking/token-selection",
                 "@openswap/cross-chain-bridge-sdk",
                 "@openswap/chainlink-sdk",
-                "@validapp/time-is-money-sdk",
+                "@scom/oswap-time-is-money-contract",
                 "@staking/staking-utils",
                 "@ijstech/eth-contract",
                 "@staking/result"
@@ -104,7 +104,7 @@
         "@staking/token-selection": {
             "path": "token-selection",
             "dependencies": [
-                "@openswap/sdk",
+                "@scom/oswap-openswap-contract",
                 "@staking/store",
                 "@staking/global",
                 "@staking/assets",
@@ -115,10 +115,9 @@
     "dependencies": {
         "@ijstech/eth-wallet": "*",
         "@ijstech/eth-contract": "*",
-        "@validapp/time-is-money-sdk": "*",
-        "@validapp/cross-chain-token-sdk": "*",
+        "@scom/oswap-time-is-money-contract": "*",
         "@openswap/cross-chain-bridge-sdk": "*",
         "@openswap/chainlink-sdk": "*",
-        "@openswap/sdk": "*"
+        "@scom/oswap-openswap-contract": "*"
     }
 }

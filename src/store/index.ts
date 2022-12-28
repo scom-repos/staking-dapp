@@ -9,7 +9,7 @@ import {
   EventId,
 } from '@staking/global';
 
-import { Contracts } from '@openswap/sdk';
+import { Contracts } from '@scom/oswap-openswap-contract';
 import Assets from '@staking/assets';
 import {
   DefaultTokens,

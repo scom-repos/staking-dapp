@@ -347,6 +347,9 @@ Styles.cssRule('.staking-component', {
         }
       }
     },
+    'i-modal .modal': {
+      background: '#192046',
+    },
     '#loadingElm.i-loading--active': {
       marginTop: '2rem',
       position: 'initial',

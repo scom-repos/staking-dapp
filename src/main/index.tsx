@@ -17,7 +17,7 @@ import {
 import { Result } from '@staking/result';
 import { ManageStake } from '@staking/manage-stake';
 import { PanelConfig } from '@staking/panel-config';
-import { Contracts } from '@validapp/time-is-money-sdk';
+import { Contracts } from '@scom/oswap-time-is-money-contract';
 import './index.css';
 
 @customModule
@@ -748,7 +748,7 @@ export class StakingBlock extends Module implements PageBlock {
 					const rewardToken = this.getRewardToken(rewardsData[0].rewardTokenAddress);
 					const rewardIconPath = getTokenIconPath(rewardToken, chainId);
 					stakingElms[optionIdx].appendChild(
-						<i-vstack gap={16} width={maxWidth} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
+						<i-vstack gap={15} width={maxWidth} height="100%" padding={{ top: 10, bottom: 10, left: 20, right: 20 }} position="relative">
 							{ stickerSections[optionIdx] }
 							<i-hstack gap={10} width="100%" verticalAlignment="center">
 								<i-hstack gap={10} width="50%">

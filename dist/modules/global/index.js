@@ -8,7 +8,7 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-define("@staking/global/utils/common.ts", ["require", "exports", "@ijstech/eth-wallet", "@openswap/sdk"], function (require, exports, eth_wallet_1, sdk_1) {
+define("@staking/global/utils/common.ts", ["require", "exports", "@ijstech/eth-wallet", "@scom/oswap-openswap-contract"], function (require, exports, eth_wallet_1, oswap_openswap_contract_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.isAddressValid = exports.getERC20Allowance = exports.approveERC20Max = exports.getERC20Amount = exports.registerSendTxEvents = exports.isTransactionConfirmed = void 0;
@@ -42,7 +42,7 @@ define("@staking/global/utils/common.ts", ["require", "exports", "@ijstech/eth-w
     const approveERC20Max = async (token, spenderAddress, callback, confirmationCallback) => {
         let wallet = eth_wallet_1.Wallet.getInstance();
         let amount = new eth_wallet_1.BigNumber(2).pow(256).minus(1);
-        let erc20 = new sdk_1.Contracts.ERC20(wallet, token.address);
+        let erc20 = new oswap_openswap_contract_1.Contracts.ERC20(wallet, token.address);
         exports.registerSendTxEvents({
             transactionHash: callback,
             confirmation: confirmationCallback
@@ -58,7 +58,7 @@ define("@staking/global/utils/common.ts", ["require", "exports", "@ijstech/eth-w
         if (!(token === null || token === void 0 ? void 0 : token.address))
             return null;
         let wallet = eth_wallet_1.Wallet.getInstance();
-        let erc20 = new sdk_1.Contracts.ERC20(wallet, token.address);
+        let erc20 = new oswap_openswap_contract_1.Contracts.ERC20(wallet, token.address);
         let allowance = await erc20.allowance({
             owner: wallet.account.address,
             spender: spenderAddress
